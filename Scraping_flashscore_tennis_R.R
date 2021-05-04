@@ -221,12 +221,6 @@ for (match in matches){
       content() %>% 
       str_extract('(home-away).*?(Set 1)')
     
-    # In R, if the retrieved file were empty, this section would evaluate further ending up with
-    # NULL (not NA) values for betting odds, causing an error in apending the new row to the data frame.
-    # Therefore we want to raise an error in this case and jump to the error-handiling part. In Python
-    # version of the scaper, it is not needed.
-    # if (is_empty(match_odds)) stop()
-    
     # It seems that invalid (crossed-out) odds are those that end up with '¬OG÷0', and the valid ones
     # end up with '¬OG÷1'.
     valid_odds <- match_odds %>% 
