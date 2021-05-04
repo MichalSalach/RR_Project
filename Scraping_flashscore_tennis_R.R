@@ -1,6 +1,3 @@
-
-setwd("C:/Users/salac/Desktop/Reproducible Research/RR_Project_copy")  ## zmienić ścieżkę
-
 #### Libraries ####
 
 library(tidyverse)   # 1.3.1
