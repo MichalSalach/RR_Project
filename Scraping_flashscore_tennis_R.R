@@ -189,16 +189,19 @@ for (match in matches){
     
   }, error = function(e) {
     new_row['event'] = NA
-    # In case of failure, we can use another method of retrieving players' names and natialities, 
+    # In case of failure, we can use another method of retrieving players' names, 
     # not using the match_page, but the main_page instead.
     details_player_1 <- str_extract(match, '¬AE÷.*?¬JA÷') %>% 
-      str_split(' \\(', simplify = TRUE)
+      str_replace(' \\(.*\\)', '') %>% 
+      str_replace('/', ' / ')
     details_player_2 <- str_extract(match, '¬AF÷.*?¬JB÷') %>% 
-      str_split(' \\(', simplify = TRUE)
-    new_row['player_1'] <- str_sub(details_player_1[1], 5)
-    new_row['player_1_nationality'] <- str_sub(details_player_1[2], 1, -6)
-    new_row['player_2'] <- str_sub(details_player_2[1], 5)
-    new_row['player_2_nationality'] <- str_sub(details_player_2[2], 1, -6)
+      str_replace(' \\(.*\\)', '') %>% 
+      str_replace('/', ' / ')
+    
+    new_row['player_1'] <- str_sub(details_player_1, 5, -5)
+    new_row['player_1_nationality'] <- ''
+    new_row['player_2'] <- str_sub(details_player_2, 5, -5)
+    new_row['player_2_nationality'] <- ''
     new_row['player_1_rank'] <- NA
     new_row['player_2_rank'] <- NA
     new_row['player_1_link'] <- NA
