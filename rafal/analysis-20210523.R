@@ -1,38 +1,12 @@
-# ---
-# title: "Reproducible Research 2021: Live analysis of betting odds for tennis matches"
-# author:
-# - "Rafał Rysiejko"
-# - "Michał Sałach"
-# date: "May 2021"
-# output:
-#  prettydoc::html_pretty:
-#    theme: cayman
-# params:
-#  money:
-#    label: "Money to bet"
-#    value: 1000
-#    min: 1
-#  expected_return:
-#    label: "Expected return, if the favourite wins (fraction of money to bet)"
-#    value: 0.1
-#    min: 0.01
-#  adverse_return:
-#    label: "Accepted return, if the favourite will not win (fraction of money to bet)"
-#    value: -0.2
-#    min: -1
-# ---
-
-#+ r setup, include = FALSE
-
-#### Libraries ####
 library(tidyverse)  # tidyverse 1.3.1
 
 # Note: I use the function if_any() from dplyr 1.0.5, which was not included in some of the 
 # earlier versions of the package.
 
 #### Data ####
+getwd()
 
-data <- read_csv('data_060521_163644.csv')
+data <- read_csv('./data_060521_163644.csv')
 
 #### Analysis ####
 
@@ -42,7 +16,6 @@ data <- read_csv('data_060521_163644.csv')
 money <- params$money
 expected_return <- params$expected_return
 adverse_return <- params$adverse_return
-
 ##
 
 # A list of bookmakers
@@ -62,30 +35,22 @@ bookmakers_links <- c('https://www.efortuna.pl/',
 # and min offers for both players in a match.
 
 data <- data %>%
-  mutate(match_id = row_number(), .before = event) %>%
-  mutate(match_current = if_else(if_any(contains('_games'), function(x)
-    is.na(x)),
-    0, 1), .after = match_time) %>%
-  pivot_longer(cols = (paste0('player_1_', bookmakers)),
-               names_to = 'player_1_bookmaker',
-               values_to = 'player_1_odds') %>%
-  pivot_longer(cols = (paste0('player_2_', bookmakers)),
-               names_to = 'player_2_bookmaker',
-               values_to = 'player_2_odds') %>%
-  mutate(
-    player_1_bookmaker = str_replace(player_1_bookmaker, 'player_1_', ''),
-    player_2_bookmaker = str_replace(player_2_bookmaker, 'player_2_', '')
-  ) %>%
-  group_by(match_id) %>%
-  mutate(
-    player_1_odds_max = max(player_1_odds, na.rm = TRUE),
-    player_1_odds_min = min(player_1_odds, na.rm = TRUE),
-    player_2_odds_max = max(player_2_odds, na.rm = TRUE),
-    player_2_odds_min = min(player_2_odds, na.rm = TRUE)
-  ) %>%
-  ungroup() %>%
-  filter(!(if_any(contains('_odds_'), function(x)
-    is.infinite(x))))  # See the note below.
+  mutate(match_id = row_number(), .before = event) %>% 
+  mutate(match_current = if_else(if_any(contains('_games'), function(x) is.na(x)),
+                                 0, 1), .after = match_time) %>% 
+  pivot_longer(cols = (paste0('player_1_', bookmakers)), names_to = 'player_1_bookmaker',
+               values_to = 'player_1_odds') %>% 
+  pivot_longer(cols = (paste0('player_2_', bookmakers)), names_to = 'player_2_bookmaker',
+               values_to = 'player_2_odds') %>% 
+  mutate(player_1_bookmaker = str_replace(player_1_bookmaker, 'player_1_', ''),
+         player_2_bookmaker = str_replace(player_2_bookmaker, 'player_2_', '')) %>% 
+  group_by(match_id) %>% 
+  mutate(player_1_odds_max = max(player_1_odds, na.rm = TRUE),
+         player_1_odds_min = min(player_1_odds, na.rm = TRUE),    
+         player_2_odds_max = max(player_2_odds, na.rm = TRUE),  
+         player_2_odds_min = min(player_2_odds, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  filter(!(if_any(contains('_odds_'), function(x) is.infinite(x))))  # See the note below.
 
 # Note: warnings signify that there are matches for which there is no offer (NAs for all
 # bookmakers). It may happen that a future match has currently no betting odds, or that all 
@@ -213,4 +178,3 @@ data_max_return <- data %>%
 # - dodać linki do stron bukmacherów w tekście
 # - dodać disclaimer, że zakłady to hazard i 18+, a praca ma charakter badawczo-analityczny
 # - na koniec połaczyć scraper w R i generator raportów
-
