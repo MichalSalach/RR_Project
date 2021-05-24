@@ -61,6 +61,14 @@ bookmakers_links <- c('https://www.efortuna.pl/',
 # Then transform data to long format (match-bookmaker-value in separate columns) and count max
 # and min offers for both players in a match.
 
+# Translate Polish tennis specific terms and countries name to english
+dict <- read_csv('rafal/translation-20210524.csv')
+for (i in 1:length(dict$pl)) {
+  
+  data$event <- as.data.frame(sapply(data$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
+  
+}
+
 data <- data %>%
   mutate(match_id = row_number(), .before = event) %>%
   mutate(match_current = if_else(if_any(contains('_games'), function(x)
