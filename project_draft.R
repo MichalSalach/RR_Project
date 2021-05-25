@@ -56,6 +56,8 @@ bookmakers_links <- c('https://www.efortuna.pl/',
                       'https://lvbet.pl/pl/',
                       'https://www.totolotek.pl/pl')
 
+bookmakers_df <- data.frame(bookmakers,bookmakers_links)
+
 # Add a match identifier and a boolean for whether a match is ongoing, or future (it's the case
 # when there is no data for games).
 # Then transform data to long format (match-bookmaker-value in separate columns) and count max
@@ -219,6 +221,7 @@ data_max_return <- data %>%
 # (ATP, WTA, Challenger, inne), płać (men, women, mixed) i wydarzenie (tylko dla informacji, można spróbować
 # przetłumaczyć); i ze zmiennymi `gender` i `event_type` też zrobić analizę.
 # - dodać linki do stron bukmacherów w tekście
+
 # - dodać disclaimer, że zakłady to hazard i 18+, a praca ma charakter badawczo-analityczny
 # - na koniec połaczyć scraper w R i generator raportów
 

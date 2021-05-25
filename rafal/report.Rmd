@@ -57,6 +57,8 @@ bookmakers_links <- c('https://www.efortuna.pl/',
                       'https://lvbet.pl/pl/',
                       'https://www.totolotek.pl/pl')
 
+bookmakers_df <- data.frame(bookmakers,bookmakers_links)
+
 # Add a match identifier and a boolean for whether a match is ongoing, or future (it's the case
 # when there is no data for games).
 # Then transform data to long format (match-bookmaker-value in separate columns) and count max
@@ -126,6 +128,10 @@ data_min_adverse <- data %>%
          better_non_favourite = if_else(better_favourite == '1', '2', '1')) %>% 
   arrange(desc(better_adverse_return))
 
+
+book <- pull(data_max_return[paste0('player_', data_max_return$better_non_favourite[1], '_bookmaker')])[1]
+link <- bookmakers_df %>% filter(bookmakers==pull(data_max_return[paste0('player_',data_max_return$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
+
 ```
 
 Having `r money` PLN, the best bet to do right now in order to have `r 100*expected_return`% return
@@ -145,3 +151,13 @@ on `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favour
 expected return: `r round(pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1])])[1], 2)`
 PLN, that is `r round(100*pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1], '_return')])[1], 2)`%)
 in `r pull(data_min_adverse['event'])[1]` (starting `r pull(data_min_adverse['match_time'])[1]`).
+
+
+# Option 1
+Book `r book` adress: `r link`
+
+# Option 2
+[`r book`](`r link`)
+
+# Option 3
+[`r pull(data_max_return[paste0('player_', data_max_return$better_non_favourite[1], '_bookmaker')])[1]`](`r bookmakers_df %>% filter(bookmakers==pull(data_max_return[paste0('player_',data_max_return$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)`)
