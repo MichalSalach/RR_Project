@@ -26,9 +26,6 @@ params:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE,include=FALSE}
 library(tidyverse)  # tidyverse 1.3.1
@@ -130,34 +127,54 @@ data_min_adverse <- data %>%
 
 
 book <- pull(data_max_return[paste0('player_', data_max_return$better_non_favourite[1], '_bookmaker')])[1]
-link <- bookmakers_df %>% filter(bookmakers==pull(data_max_return[paste0('player_',data_max_return$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
+link <- bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
+
+
+bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
 
 ```
 
-Having `r money` PLN, the best bet to do right now in order to have `r 100*expected_return`% return
-in the case of a favourite win and minimal loss in the case of the favourite loss is to bet
-`r round(pull(data_min_adverse[paste0('to_bet_', data_min_adverse$better_favourite[1], '_if_', data_min_adverse$better_favourite[1], '_favourite')])[1], 2)`
-PLN on `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1])])[1]`
-(`r pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_nationality')])[1]`,
-ATP ranking: `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_rank')])[1]`)
-on `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_bookmaker')])[1]`
-(betting odds: `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_odds')])[1]`)
-and `r round(pull(data_min_adverse[paste0('to_bet_', data_min_adverse$better_non_favourite[1], '_if_', data_min_adverse$better_favourite[1], '_favourite')])[1], 2)`
-PLN on `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1])])[1]`
-(`r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_nationality')])[1]`,
-ATP ranking: `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_rank')])[1]`)
-on `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]`
-(betting odds: `r pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_odds')])[1]`,
-expected return: `r round(pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1])])[1], 2)`
-PLN, that is `r round(100*pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1], '_return')])[1], 2)`%)
-in `r pull(data_min_adverse['event'])[1]` (starting `r pull(data_min_adverse['match_time'])[1]`).
+```{r variables, echo=FALSE,include=FALSE}
+# List of variable for inline referencing
+
+#==============================================
+# Best bet summary
+#==============================================
+
+value_to_bet <- round(pull(data_min_adverse[paste0('to_bet_', data_min_adverse$better_favourite[1], '_if_', data_min_adverse$better_favourite[1], '_favourite')])[1], 2)
+
+player_to_bet_for <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1])])[1]
+player_to_bet_for_nationality <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_nationality')])[1]
+player_to_bet_for_atp_ranking <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_rank')])[1]
+best_bet_bookmaker <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_bookmaker')])[1]
+best_bet_bookmaker_link <- bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
+best_bet_betting_odds <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_favourite[1], '_odds')])[1]
+
+value_to_bet2 <- round(pull(data_min_adverse[paste0('to_bet_', data_min_adverse$better_non_favourite[1], '_if_', data_min_adverse$better_favourite[1], '_favourite')])[1], 2)
+player_to_bet_for2 <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1])])[1]
+player_to_bet_for_nationality2 <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_nationality')])[1] 
+player_to_bet_for_atp_ranking2 <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_rank')])[1]
+best_bet_bookmaker2 <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]
+best_bet_bookmaker_link2 <- bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
+best_bet_betting_odds2 <- pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_odds')])[1]
+
+expected_return_pln <- round(pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1])])[1], 2)
+expected_return_percentage <- round(100*pull(data_min_adverse[paste0('win_', data_min_adverse$better_non_favourite[1], '_bet_', data_min_adverse$better_favourite[1], '_return')])[1], 2)
+
+event <- pull(data_min_adverse['event'])[1]
+match_time <- pull(data_min_adverse['match_time'])[1]
+
+#==============================================
+# List of best bets for each bookmaker
+#==============================================
+
+```
 
 
-# Option 1
-Book `r book` adress: `r link`
+## Best bet prediction
 
-# Option 2
-[`r book`](`r link`)
+Having `r money` PLN, the best bet to do right now in order to have `r 100*expected_return`% return in the case of a favorite win and minimal loss in the case of the favorite loss is to bet `r value_to_bet` PLN on `r player_to_bet_for` (`r player_to_bet_for_nationality`, ATP ranking: `r player_to_bet_for_atp_ranking`) on [`r best_bet_bookmaker`](`r best_bet_bookmaker_link`) (betting odds: `r best_bet_betting_odds`) and `r value_to_bet2` PLN on `r player_to_bet_for2` (`r player_to_bet_for_nationality2`, ATP ranking: `r player_to_bet_for_atp_ranking2`) on [`r best_bet_bookmaker2`](`r best_bet_bookmaker_link2`) (betting odds: `r best_bet_betting_odds2`, expected return: `r expected_return_pln` PLN, that is `r expected_return_percentage`%) in `r event` (starting `r match_time`).
 
-# Option 3
-[`r pull(data_max_return[paste0('player_', data_max_return$better_non_favourite[1], '_bookmaker')])[1]`](`r bookmakers_df %>% filter(bookmakers==pull(data_max_return[paste0('player_',data_max_return$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)`)
+**Disclaimer**
+
+*Please note, that online betting is a gambling entertainment vehicle, and that it carries with it a certain degree of financial risk. Players should be aware of this risk, and govern themselves accordingly.*

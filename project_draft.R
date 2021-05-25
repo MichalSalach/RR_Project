@@ -201,7 +201,7 @@ data_max_return <- data %>%
 #' and `r round(pull(data_max_return[paste0('to_bet_', data_max_return$better_favourite[1], '_if_', data_max_return$better_favourite[1], '_favourite')])[1], 2)` 
 #' PLN on `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1])])[1]`
 #' (`r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_nationality')])[1]`,
-#' ATP ranking: `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_rank')])[1]`)
+#' ATP ranking: `r pull(data_max_return[paste0('player_', data_max_return$bett=er_favourite[1], '_rank')])[1]`)
 #' on `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_bookmaker')])[1]`
 #' (betting odds: `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_odds')])[1]`)
 #' in `r pull(data_max_return['event'])[1]` (starting `r pull(data_max_return['match_time'])[1]`).
@@ -219,9 +219,8 @@ data_max_return <- data %>%
 # Co dodać: 
 # - tłumczenie zm. `event` (np. używając str_replace()) - a najlepiej rozbić zm `event` na typ wydarzenia
 # (ATP, WTA, Challenger, inne), płać (men, women, mixed) i wydarzenie (tylko dla informacji, można spróbować
-# przetłumaczyć); i ze zmiennymi `gender` i `event_type` też zrobić analizę.
-# - dodać linki do stron bukmacherów w tekście
-
-# - dodać disclaimer, że zakłady to hazard i 18+, a praca ma charakter badawczo-analityczny
+# przetłumaczyć); i ze zmiennymi `gender` i `event_type` też zrobić analizę. - done
+# - dodać linki do stron bukmacherów w tekście - done
+# - dodać disclaimer, że zakłady to hazard i 18+, a praca ma charakter badawczo-analityczny - done
 # - na koniec połaczyć scraper w R i generator raportów
 
