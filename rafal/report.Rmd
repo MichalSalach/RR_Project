@@ -193,7 +193,16 @@ match_time <- pull(data_min_adverse['match_time'])[1]
 ```
 
 
-## Best bet prediction
+# Best bet prediction
+## Introduction 
+
+In our project, we search for the most profitable bets to make on the tennis matches for a given moment. We consider seven popular Polish bookmakers whose betting odds are reported on an ongoing basis on flashscore.pl/tennis. We are interested in the results only (who wins) and only in the ongoing or scheduled matches for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match, there is a favorite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the odds for both players are the same - this does not cause a problem for our analysis). A favorite of a bookmaker in a given match is the player for whom offers are lower (closer to 1). There is also a favorite of a client of the bookmaker - this is the player whose win would grant the client a profit.
+
+Given that in reality, offers for both players are greater than 1, a client does not have to bet all their money on a favorite to achieve some profit. The remaining amount of money the client would bet on a non-favorite as a form of insurance in the case of misfortune (favorite loses). A no-risk bet is, therefore, a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favorite loses. For example, in betting, odds for a player A (the bookmaker's favorite) are 1.5, and for a player, B is 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the project aims to find the offers that come the closest to this, for any moment in time.
+
+Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client's favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite's win, having fixed on some level the loss in the adverse case.
+The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul 1000 PLN), *expected_return* (defaul 0.1) and *adverse_return* (default -0.2).
+
 ### Best bet in case the favourite wins
 
 Having `r money` PLN, the best bet to do right now in order to have `r 100*expected_return`% return in the case of a favorite win and minimal loss in the case of the favorite loss is to bet `r value_to_bet` PLN on `r player_to_bet_for` (`r player_to_bet_for_nationality`, ATP ranking: `r player_to_bet_for_atp_ranking`) on [`r best_bet_bookmaker`](`r best_bet_bookmaker_link`) (betting odds: `r best_bet_betting_odds`) and `r value_to_bet2` PLN on `r player_to_bet_for2` (`r player_to_bet_for_nationality2`, ATP ranking: `r player_to_bet_for_atp_ranking2`) on [`r best_bet_bookmaker2`](`r best_bet_bookmaker_link2`) (betting odds: `r best_bet_betting_odds2`, expected return: `r expected_return_pln` PLN, that is `r expected_return_percentage`%) in `r event` (starting `r match_time`).
@@ -229,20 +238,25 @@ match_time_ <- pull(data_max_return['match_time'])[1]
 ```
 
 ### Best bet in case the favourite loses
-Having `r money` PLN, the best bet to do right now in order to have maximum`r 100*adverse_return`% return in the case of a favorite loss and maximal return in the case of the favorite win is to bet `r value_to_bet_`PLN on `r player_to_bet_for_` (`r player_to_bet_for_nationality_`, ATP ranking: `r player_to_bet_for_atp_ranking_`) on [`r best_bet_bookmaker_`](`r best_bet_bookmaker_link_`) (betting odds: `r best_bet_betting_odds_`, expected return: `r expected_return_pln` PLN, that is `r expected_return_percentage_`%) and `r value_to_bet2_` PLN on `r player_to_bet_for2_` (`r player_to_bet_for_nationality2_`, ATP ranking: `r player_to_bet_for_atp_ranking2_`) on [`r best_bet_bookmaker2_`](`r best_bet_bookmaker_link2_`) (betting odds: `r best_bet_betting_odds2_`) in `r event_` (starting `r match_time_`)
+Having `r money` PLN, the best bet to do right now in order to have maximum`r 100*adverse_return`% return in the case of a favorite loss and maximal return in the case of the favorite win is to bet `r value_to_bet_`PLN on `r player_to_bet_for_` (`r player_to_bet_for_nationality_`, ATP ranking: `r player_to_bet_for_atp_ranking_`) on [`r best_bet_bookmaker_`](`r best_bet_bookmaker_link_`) (betting odds: `r best_bet_betting_odds_`, expected return: `r expected_return_pln_` PLN, that is `r expected_return_percentage_`%) and `r value_to_bet2_` PLN on `r player_to_bet_for2_` (`r player_to_bet_for_nationality2_`, ATP ranking: `r player_to_bet_for_atp_ranking2_`) on [`r best_bet_bookmaker2_`](`r best_bet_bookmaker_link2_`) (betting odds: `r best_bet_betting_odds2_`) in `r event_` (starting `r match_time_`)
 
 ```{r variables_top3_for_each_bookmaker, echo=FALSE,include=FALSE}
 # List of variable for inline referencing
 
-# ===========
+# =============================================================================
 # eFortuna
 # Min_adverse
-# ========
-#Player
+# =============================================================================
+#Player 1
 data_b1.1 <- data_min_adverse %>% filter(player_1_bookmaker == "eFortuna" | player_2_bookmaker == "eFortuna")
-data_b1.1_player_1 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[1])])[1]
-data_b1.1_player_2 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[2])])[2]
-data_b1.1_player_3 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[3])])[3]
+data_b1.1_player1_1 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[1])])[1]
+data_b1.1_player1_2 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[2])])[2]
+data_b1.1_player1_3 <- pull(data_b1.1[paste0('player_', data_b1.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b1.1_player2_1 <- pull(data_b1.1[paste0('player_', data_b1.1$better_non_favourite[1])])[1]
+data_b1.1_player2_2 <- pull(data_b1.1[paste0('player_', data_b1.1$better_non_favourite[2])])[2]
+data_b1.1_player2_3 <- pull(data_b1.1[paste0('player_', data_b1.1$better_non_favourite[3])])[3]
 
 # Event
 data_b1.1_event_1 <- pull(data_b1.1['event'])[1]
@@ -254,10 +268,15 @@ data_b1.1_time_1 <- pull(data_max_return['match_time'])[1]
 data_b1.1_time_2 <- pull(data_max_return['match_time'])[2]
 data_b1.1_time_3 <- pull(data_max_return['match_time'])[3]
 
-# Money to bet
-data_b1.1_money_1 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[1], '_if_', data_b1.1$better_favourite[1], '_favourite')])[1], 2)
-data_b1.1_money_2 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[2], '_if_', data_b1.1$better_favourite[1], '_favourite')])[2], 2)
-data_b1.1_money_3 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[3], '_if_', data_b1.1$better_favourite[1], '_favourite')])[3], 2)
+# Money to bet 1
+data_b1.1_money1_1 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[1], '_if_', data_b1.1$better_favourite[1], '_favourite')])[1], 2)
+data_b1.1_money1_2 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[2], '_if_', data_b1.1$better_favourite[1], '_favourite')])[2], 2)
+data_b1.1_money1_3 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_favourite[3], '_if_', data_b1.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b1.1_money2_1 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_non_favourite[1], '_if_', data_b1.1$better_favourite[1], '_favourite')])[1], 2)
+data_b1.1_money2_2 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_non_favourite[2], '_if_', data_b1.1$better_favourite[1], '_favourite')])[2], 2)
+data_b1.1_money2_3 <- round(pull(data_b1.1[paste0('to_bet_', data_b1.1$better_non_favourite[3], '_if_', data_b1.1$better_favourite[1], '_favourite')])[3], 2)
 
 # Expected return
 data_b1.1_return_1 <- round(pull(data_b1.1[paste0('win_', data_b1.1$better_non_favourite[1], '_bet_', data_b1.1$better_favourite[1])])[1], 2)
@@ -269,33 +288,548 @@ data_b1.1_return_3 <- round(pull(data_b1.1[paste0('win_', data_b1.1$better_non_f
 # Max return
 # ========
 
+# Max return
 data_b1.2 <- data_max_return %>% filter(player_1_bookmaker == "eFortuna" | player_2_bookmaker == "eFortuna")
 
-# Player
-data_b1.2_player_1 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[1])])[1]
-data_b1.2_player_2 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[2])])[2]
-data_b1.2_player_3 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[3])])[3]
+# Player 1 
+data_b1.2_player1_1 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[1])])[1]
+data_b1.2_player1_2 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[2])])[2]
+data_b1.2_player1_3 <- pull(data_b1.2[paste0('player_', data_b1.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b1.2_player2_1 <- pull(data_b1.2[paste0('player_', data_b1.2$better_favourite[1])])[1]
+data_b1.2_player2_2 <- pull(data_b1.2[paste0('player_', data_b1.2$better_favourite[2])])[2]
+data_b1.2_player2_3 <- pull(data_b1.2[paste0('player_', data_b1.2$better_favourite[3])])[3]
 
 # Event
 data_b1.2_event_1 <- pull(data_b1.2['event'])[1]
 data_b1.2_event_2 <- pull(data_b1.2['event'])[2]
 data_b1.2_event_3 <- pull(data_b1.2['event'])[3]
-    
+
 # Time
 data_b1.2_time_1 <- pull(data_max_return['match_time'])[1]
 data_b1.2_time_2 <- pull(data_max_return['match_time'])[2]
 data_b1.2_time_3 <- pull(data_max_return['match_time'])[3]
 
-# Money to bet
-data_b1.2_money_1 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[1], '_if_', data_b1.2$better_favourite[1], '_favourite')])[1], 2)
-data_b1.2_money_2 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[2], '_if_', data_b1.2$better_favourite[1], '_favourite')])[2], 2)
-data_b1.2_money_3 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[3], '_if_', data_b1.2$better_favourite[1], '_favourite')])[3], 2)
+# Money to bet player 1
+data_b1.2_money1_1 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[1], '_if_', data_b1.2$better_favourite[1], '_favourite')])[1], 2)
+data_b1.2_money1_2 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[2], '_if_', data_b1.2$better_favourite[1], '_favourite')])[2], 2)
+data_b1.2_money1_3 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_non_favourite[3], '_if_', data_b1.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b1.2_money2_1 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_favourite[1], '_if_', data_b1.2$better_favourite[1], '_favourite')])[1], 2)
+data_b1.2_money2_2 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_favourite[2], '_if_', data_b1.2$better_favourite[1], '_favourite')])[2], 2)
+data_b1.2_money2_3 <- round(pull(data_b1.2[paste0('to_bet_', data_b1.2$better_favourite[3], '_if_', data_b1.2$better_favourite[1], '_favourite')])[3], 2)
 
 # Expected return
 data_b1.2_return_1 <- round(pull(data_b1.2[paste0('win_', data_b1.2$better_favourite[1], '_bet_', data_b1.2$better_favourite[1])])[1], 2)
 data_b1.2_return_2 <- round(pull(data_b1.2[paste0('win_', data_b1.2$better_favourite[2], '_bet_', data_b1.2$better_favourite[2])])[2], 2)
 data_b1.2_return_3 <- round(pull(data_b1.2[paste0('win_', data_b1.2$better_favourite[3], '_bet_', data_b1.2$better_favourite[3])])[3], 2)
 
+# =============================================================================
+# STS
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b2.1 <- data_min_adverse %>% filter(player_1_bookmaker == "STS" | player_2_bookmaker == "STS")
+data_b2.1_player1_1 <- pull(data_b2.1[paste0('player_', data_b2.1$better_favourite[1])])[1]
+data_b2.1_player1_2 <- pull(data_b2.1[paste0('player_', data_b2.1$better_favourite[2])])[2]
+data_b2.1_player1_3 <- pull(data_b2.1[paste0('player_', data_b2.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b2.1_player2_1 <- pull(data_b2.1[paste0('player_', data_b2.1$better_non_favourite[1])])[1]
+data_b2.1_player2_2 <- pull(data_b2.1[paste0('player_', data_b2.1$better_non_favourite[2])])[2]
+data_b2.1_player2_3 <- pull(data_b2.1[paste0('player_', data_b2.1$better_non_favourite[3])])[3]
+
+# Event
+data_b2.1_event_1 <- pull(data_b2.1['event'])[1]
+data_b2.1_event_2 <- pull(data_b2.1['event'])[2]
+data_b2.1_event_3 <- pull(data_b2.1['event'])[3]
+
+# Time
+data_b2.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b2.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b2.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b2.1_money1_1 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_favourite[1], '_if_', data_b2.1$better_favourite[1], '_favourite')])[1], 2)
+data_b2.1_money1_2 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_favourite[2], '_if_', data_b2.1$better_favourite[1], '_favourite')])[2], 2)
+data_b2.1_money1_3 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_favourite[3], '_if_', data_b2.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b2.1_money2_1 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_non_favourite[1], '_if_', data_b2.1$better_favourite[1], '_favourite')])[1], 2)
+data_b2.1_money2_2 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_non_favourite[2], '_if_', data_b2.1$better_favourite[1], '_favourite')])[2], 2)
+data_b2.1_money2_3 <- round(pull(data_b2.1[paste0('to_bet_', data_b2.1$better_non_favourite[3], '_if_', data_b2.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b2.1_return_1 <- round(pull(data_b2.1[paste0('win_', data_b2.1$better_non_favourite[1], '_bet_', data_b2.1$better_favourite[1])])[1], 2)
+data_b2.1_return_2 <- round(pull(data_b2.1[paste0('win_', data_b2.1$better_non_favourite[2], '_bet_', data_b2.1$better_favourite[2])])[2], 2)
+data_b2.1_return_3 <- round(pull(data_b2.1[paste0('win_', data_b2.1$better_non_favourite[3], '_bet_', data_b2.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# STS
+# Max return
+# =============================================================================
+
+# Max return
+data_b2.2 <- data_max_return %>% filter(player_1_bookmaker == "STS" | player_2_bookmaker == "STS")
+
+# Player 1 
+data_b2.2_player1_1 <- pull(data_b2.2[paste0('player_', data_b2.2$better_non_favourite[1])])[1]
+data_b2.2_player1_2 <- pull(data_b2.2[paste0('player_', data_b2.2$better_non_favourite[2])])[2]
+data_b2.2_player1_3 <- pull(data_b2.2[paste0('player_', data_b2.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b2.2_player2_1 <- pull(data_b2.2[paste0('player_', data_b2.2$better_favourite[1])])[1]
+data_b2.2_player2_2 <- pull(data_b2.2[paste0('player_', data_b2.2$better_favourite[2])])[2]
+data_b2.2_player2_3 <- pull(data_b2.2[paste0('player_', data_b2.2$better_favourite[3])])[3]
+
+# Event
+data_b2.2_event_1 <- pull(data_b2.2['event'])[1]
+data_b2.2_event_2 <- pull(data_b2.2['event'])[2]
+data_b2.2_event_3 <- pull(data_b2.2['event'])[3]
+
+# Time
+data_b2.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b2.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b2.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b2.2_money1_1 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_non_favourite[1], '_if_', data_b2.2$better_favourite[1], '_favourite')])[1], 2)
+data_b2.2_money1_2 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_non_favourite[2], '_if_', data_b2.2$better_favourite[1], '_favourite')])[2], 2)
+data_b2.2_money1_3 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_non_favourite[3], '_if_', data_b2.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b2.2_money2_1 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_favourite[1], '_if_', data_b2.2$better_favourite[1], '_favourite')])[1], 2)
+data_b2.2_money2_2 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_favourite[2], '_if_', data_b2.2$better_favourite[1], '_favourite')])[2], 2)
+data_b2.2_money2_3 <- round(pull(data_b2.2[paste0('to_bet_', data_b2.2$better_favourite[3], '_if_', data_b2.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b2.2_return_1 <- round(pull(data_b2.2[paste0('win_', data_b2.2$better_favourite[1], '_bet_', data_b2.2$better_favourite[1])])[1], 2)
+data_b2.2_return_2 <- round(pull(data_b2.2[paste0('win_', data_b2.2$better_favourite[2], '_bet_', data_b2.2$better_favourite[2])])[2], 2)
+data_b2.2_return_3 <- round(pull(data_b2.2[paste0('win_', data_b2.2$better_favourite[3], '_bet_', data_b2.2$better_favourite[3])])[3], 2)
+
+
+# =============================================================================
+# Betclic
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b3.1 <- data_min_adverse %>% filter(player_1_bookmaker == "Betclic" | player_2_bookmaker == "Betclic")
+data_b3.1_player1_1 <- pull(data_b3.1[paste0('player_', data_b3.1$better_favourite[1])])[1]
+data_b3.1_player1_2 <- pull(data_b3.1[paste0('player_', data_b3.1$better_favourite[2])])[2]
+data_b3.1_player1_3 <- pull(data_b3.1[paste0('player_', data_b3.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b3.1_player2_1 <- pull(data_b3.1[paste0('player_', data_b3.1$better_non_favourite[1])])[1]
+data_b3.1_player2_2 <- pull(data_b3.1[paste0('player_', data_b3.1$better_non_favourite[2])])[2]
+data_b3.1_player2_3 <- pull(data_b3.1[paste0('player_', data_b3.1$better_non_favourite[3])])[3]
+
+# Event
+data_b3.1_event_1 <- pull(data_b3.1['event'])[1]
+data_b3.1_event_2 <- pull(data_b3.1['event'])[2]
+data_b3.1_event_3 <- pull(data_b3.1['event'])[3]
+
+# Time
+data_b3.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b3.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b3.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b3.1_money1_1 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_favourite[1], '_if_', data_b3.1$better_favourite[1], '_favourite')])[1], 2)
+data_b3.1_money1_2 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_favourite[2], '_if_', data_b3.1$better_favourite[1], '_favourite')])[2], 2)
+data_b3.1_money1_3 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_favourite[3], '_if_', data_b3.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b3.1_money2_1 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_non_favourite[1], '_if_', data_b3.1$better_favourite[1], '_favourite')])[1], 2)
+data_b3.1_money2_2 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_non_favourite[2], '_if_', data_b3.1$better_favourite[1], '_favourite')])[2], 2)
+data_b3.1_money2_3 <- round(pull(data_b3.1[paste0('to_bet_', data_b3.1$better_non_favourite[3], '_if_', data_b3.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b3.1_return_1 <- round(pull(data_b3.1[paste0('win_', data_b3.1$better_non_favourite[1], '_bet_', data_b3.1$better_favourite[1])])[1], 2)
+data_b3.1_return_2 <- round(pull(data_b3.1[paste0('win_', data_b3.1$better_non_favourite[2], '_bet_', data_b3.1$better_favourite[2])])[2], 2)
+data_b3.1_return_3 <- round(pull(data_b3.1[paste0('win_', data_b3.1$better_non_favourite[3], '_bet_', data_b3.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# Betclic
+# Max return
+# =============================================================================
+
+# Max return
+data_b3.2 <- data_max_return %>% filter(player_1_bookmaker == "Betclic" | player_2_bookmaker == "Betclic")
+
+# Player 1 
+data_b3.2_player1_1 <- pull(data_b3.2[paste0('player_', data_b3.2$better_non_favourite[1])])[1]
+data_b3.2_player1_2 <- pull(data_b3.2[paste0('player_', data_b3.2$better_non_favourite[2])])[2]
+data_b3.2_player1_3 <- pull(data_b3.2[paste0('player_', data_b3.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b3.2_player2_1 <- pull(data_b3.2[paste0('player_', data_b3.2$better_favourite[1])])[1]
+data_b3.2_player2_2 <- pull(data_b3.2[paste0('player_', data_b3.2$better_favourite[2])])[2]
+data_b3.2_player2_3 <- pull(data_b3.2[paste0('player_', data_b3.2$better_favourite[3])])[3]
+
+# Event
+data_b3.2_event_1 <- pull(data_b3.2['event'])[1]
+data_b3.2_event_2 <- pull(data_b3.2['event'])[2]
+data_b3.2_event_3 <- pull(data_b3.2['event'])[3]
+
+# Time
+data_b3.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b3.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b3.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b3.2_money1_1 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_non_favourite[1], '_if_', data_b3.2$better_favourite[1], '_favourite')])[1], 2)
+data_b3.2_money1_2 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_non_favourite[2], '_if_', data_b3.2$better_favourite[1], '_favourite')])[2], 2)
+data_b3.2_money1_3 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_non_favourite[3], '_if_', data_b3.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b3.2_money2_1 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_favourite[1], '_if_', data_b3.2$better_favourite[1], '_favourite')])[1], 2)
+data_b3.2_money2_2 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_favourite[2], '_if_', data_b3.2$better_favourite[1], '_favourite')])[2], 2)
+data_b3.2_money2_3 <- round(pull(data_b3.2[paste0('to_bet_', data_b3.2$better_favourite[3], '_if_', data_b3.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b3.2_return_1 <- round(pull(data_b3.2[paste0('win_', data_b3.2$better_favourite[1], '_bet_', data_b3.2$better_favourite[1])])[1], 2)
+data_b3.2_return_2 <- round(pull(data_b3.2[paste0('win_', data_b3.2$better_favourite[2], '_bet_', data_b3.2$better_favourite[2])])[2], 2)
+data_b3.2_return_3 <- round(pull(data_b3.2[paste0('win_', data_b3.2$better_favourite[3], '_bet_', data_b3.2$better_favourite[3])])[3], 2)
+# =============================================================================
+
+
+# =============================================================================
+# Betfan
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b4.1 <- data_min_adverse %>% filter(player_1_bookmaker == "Betfan" | player_2_bookmaker == "Betfan")
+data_b4.1_player1_1 <- pull(data_b4.1[paste0('player_', data_b4.1$better_favourite[1])])[1]
+data_b4.1_player1_2 <- pull(data_b4.1[paste0('player_', data_b4.1$better_favourite[2])])[2]
+data_b4.1_player1_3 <- pull(data_b4.1[paste0('player_', data_b4.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b4.1_player2_1 <- pull(data_b4.1[paste0('player_', data_b4.1$better_non_favourite[1])])[1]
+data_b4.1_player2_2 <- pull(data_b4.1[paste0('player_', data_b4.1$better_non_favourite[2])])[2]
+data_b4.1_player2_3 <- pull(data_b4.1[paste0('player_', data_b4.1$better_non_favourite[3])])[3]
+
+# Event
+data_b4.1_event_1 <- pull(data_b4.1['event'])[1]
+data_b4.1_event_2 <- pull(data_b4.1['event'])[2]
+data_b4.1_event_3 <- pull(data_b4.1['event'])[3]
+
+# Time
+data_b4.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b4.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b4.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b4.1_money1_1 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_favourite[1], '_if_', data_b4.1$better_favourite[1], '_favourite')])[1], 2)
+data_b4.1_money1_2 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_favourite[2], '_if_', data_b4.1$better_favourite[1], '_favourite')])[2], 2)
+data_b4.1_money1_3 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_favourite[3], '_if_', data_b4.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b4.1_money2_1 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_non_favourite[1], '_if_', data_b4.1$better_favourite[1], '_favourite')])[1], 2)
+data_b4.1_money2_2 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_non_favourite[2], '_if_', data_b4.1$better_favourite[1], '_favourite')])[2], 2)
+data_b4.1_money2_3 <- round(pull(data_b4.1[paste0('to_bet_', data_b4.1$better_non_favourite[3], '_if_', data_b4.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b4.1_return_1 <- round(pull(data_b4.1[paste0('win_', data_b4.1$better_non_favourite[1], '_bet_', data_b4.1$better_favourite[1])])[1], 2)
+data_b4.1_return_2 <- round(pull(data_b4.1[paste0('win_', data_b4.1$better_non_favourite[2], '_bet_', data_b4.1$better_favourite[2])])[2], 2)
+data_b4.1_return_3 <- round(pull(data_b4.1[paste0('win_', data_b4.1$better_non_favourite[3], '_bet_', data_b4.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# Betfan
+# Max return
+# =============================================================================
+
+# Max return
+data_b4.2 <- data_max_return %>% filter(player_1_bookmaker == "Betfan" | player_2_bookmaker == "Betfan")
+
+# Player 1 
+data_b4.2_player1_1 <- pull(data_b4.2[paste0('player_', data_b4.2$better_non_favourite[1])])[1]
+data_b4.2_player1_2 <- pull(data_b4.2[paste0('player_', data_b4.2$better_non_favourite[2])])[2]
+data_b4.2_player1_3 <- pull(data_b4.2[paste0('player_', data_b4.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b4.2_player2_1 <- pull(data_b4.2[paste0('player_', data_b4.2$better_favourite[1])])[1]
+data_b4.2_player2_2 <- pull(data_b4.2[paste0('player_', data_b4.2$better_favourite[2])])[2]
+data_b4.2_player2_3 <- pull(data_b4.2[paste0('player_', data_b4.2$better_favourite[3])])[3]
+
+# Event
+data_b4.2_event_1 <- pull(data_b4.2['event'])[1]
+data_b4.2_event_2 <- pull(data_b4.2['event'])[2]
+data_b4.2_event_3 <- pull(data_b4.2['event'])[3]
+
+# Time
+data_b4.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b4.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b4.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b4.2_money1_1 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_non_favourite[1], '_if_', data_b4.2$better_favourite[1], '_favourite')])[1], 2)
+data_b4.2_money1_2 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_non_favourite[2], '_if_', data_b4.2$better_favourite[1], '_favourite')])[2], 2)
+data_b4.2_money1_3 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_non_favourite[3], '_if_', data_b4.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b4.2_money2_1 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_favourite[1], '_if_', data_b4.2$better_favourite[1], '_favourite')])[1], 2)
+data_b4.2_money2_2 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_favourite[2], '_if_', data_b4.2$better_favourite[1], '_favourite')])[2], 2)
+data_b4.2_money2_3 <- round(pull(data_b4.2[paste0('to_bet_', data_b4.2$better_favourite[3], '_if_', data_b4.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b4.2_return_1 <- round(pull(data_b4.2[paste0('win_', data_b4.2$better_favourite[1], '_bet_', data_b4.2$better_favourite[1])])[1], 2)
+data_b4.2_return_2 <- round(pull(data_b4.2[paste0('win_', data_b4.2$better_favourite[2], '_bet_', data_b4.2$better_favourite[2])])[2], 2)
+data_b4.2_return_3 <- round(pull(data_b4.2[paste0('win_', data_b4.2$better_favourite[3], '_bet_', data_b4.2$better_favourite[3])])[3], 2)
+
+
+# =============================================================================
+# Pzbuk
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b5.1 <- data_min_adverse %>% filter(player_1_bookmaker == "Pzbuk" | player_2_bookmaker == "Pzbuk")
+data_b5.1_player1_1 <- pull(data_b5.1[paste0('player_', data_b5.1$better_favourite[1])])[1]
+data_b5.1_player1_2 <- pull(data_b5.1[paste0('player_', data_b5.1$better_favourite[2])])[2]
+data_b5.1_player1_3 <- pull(data_b5.1[paste0('player_', data_b5.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b5.1_player2_1 <- pull(data_b5.1[paste0('player_', data_b5.1$better_non_favourite[1])])[1]
+data_b5.1_player2_2 <- pull(data_b5.1[paste0('player_', data_b5.1$better_non_favourite[2])])[2]
+data_b5.1_player2_3 <- pull(data_b5.1[paste0('player_', data_b5.1$better_non_favourite[3])])[3]
+
+# Event
+data_b5.1_event_1 <- pull(data_b5.1['event'])[1]
+data_b5.1_event_2 <- pull(data_b5.1['event'])[2]
+data_b5.1_event_3 <- pull(data_b5.1['event'])[3]
+
+# Time
+data_b5.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b5.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b5.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b5.1_money1_1 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_favourite[1], '_if_', data_b5.1$better_favourite[1], '_favourite')])[1], 2)
+data_b5.1_money1_2 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_favourite[2], '_if_', data_b5.1$better_favourite[1], '_favourite')])[2], 2)
+data_b5.1_money1_3 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_favourite[3], '_if_', data_b5.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b5.1_money2_1 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_non_favourite[1], '_if_', data_b5.1$better_favourite[1], '_favourite')])[1], 2)
+data_b5.1_money2_2 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_non_favourite[2], '_if_', data_b5.1$better_favourite[1], '_favourite')])[2], 2)
+data_b5.1_money2_3 <- round(pull(data_b5.1[paste0('to_bet_', data_b5.1$better_non_favourite[3], '_if_', data_b5.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b5.1_return_1 <- round(pull(data_b5.1[paste0('win_', data_b5.1$better_non_favourite[1], '_bet_', data_b5.1$better_favourite[1])])[1], 2)
+data_b5.1_return_2 <- round(pull(data_b5.1[paste0('win_', data_b5.1$better_non_favourite[2], '_bet_', data_b5.1$better_favourite[2])])[2], 2)
+data_b5.1_return_3 <- round(pull(data_b5.1[paste0('win_', data_b5.1$better_non_favourite[3], '_bet_', data_b5.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# Pzbuk
+# Max return
+# =============================================================================
+
+# Max return
+data_b5.2 <- data_max_return %>% filter(player_1_bookmaker == "Pzbuk" | player_2_bookmaker == "Pzbuk")
+
+# Player 1 
+data_b5.2_player1_1 <- pull(data_b5.2[paste0('player_', data_b5.2$better_non_favourite[1])])[1]
+data_b5.2_player1_2 <- pull(data_b5.2[paste0('player_', data_b5.2$better_non_favourite[2])])[2]
+data_b5.2_player1_3 <- pull(data_b5.2[paste0('player_', data_b5.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b5.2_player2_1 <- pull(data_b5.2[paste0('player_', data_b5.2$better_favourite[1])])[1]
+data_b5.2_player2_2 <- pull(data_b5.2[paste0('player_', data_b5.2$better_favourite[2])])[2]
+data_b5.2_player2_3 <- pull(data_b5.2[paste0('player_', data_b5.2$better_favourite[3])])[3]
+
+# Event
+data_b5.2_event_1 <- pull(data_b5.2['event'])[1]
+data_b5.2_event_2 <- pull(data_b5.2['event'])[2]
+data_b5.2_event_3 <- pull(data_b5.2['event'])[3]
+
+# Time
+data_b5.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b5.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b5.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b5.2_money1_1 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_non_favourite[1], '_if_', data_b5.2$better_favourite[1], '_favourite')])[1], 2)
+data_b5.2_money1_2 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_non_favourite[2], '_if_', data_b5.2$better_favourite[1], '_favourite')])[2], 2)
+data_b5.2_money1_3 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_non_favourite[3], '_if_', data_b5.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b5.2_money2_1 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_favourite[1], '_if_', data_b5.2$better_favourite[1], '_favourite')])[1], 2)
+data_b5.2_money2_2 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_favourite[2], '_if_', data_b5.2$better_favourite[1], '_favourite')])[2], 2)
+data_b5.2_money2_3 <- round(pull(data_b5.2[paste0('to_bet_', data_b5.2$better_favourite[3], '_if_', data_b5.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b5.2_return_1 <- round(pull(data_b5.2[paste0('win_', data_b5.2$better_favourite[1], '_bet_', data_b5.2$better_favourite[1])])[1], 2)
+data_b5.2_return_2 <- round(pull(data_b5.2[paste0('win_', data_b5.2$better_favourite[2], '_bet_', data_b5.2$better_favourite[2])])[2], 2)
+data_b5.2_return_3 <- round(pull(data_b5.2[paste0('win_', data_b5.2$better_favourite[3], '_bet_', data_b5.2$better_favourite[3])])[3], 2)
+
+
+# =============================================================================
+# Lvbet
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b6.1 <- data_min_adverse %>% filter(player_1_bookmaker == "Lvbet" | player_2_bookmaker == "Lvbet")
+data_b6.1_player1_1 <- pull(data_b6.1[paste0('player_', data_b6.1$better_favourite[1])])[1]
+data_b6.1_player1_2 <- pull(data_b6.1[paste0('player_', data_b6.1$better_favourite[2])])[2]
+data_b6.1_player1_3 <- pull(data_b6.1[paste0('player_', data_b6.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b6.1_player2_1 <- pull(data_b6.1[paste0('player_', data_b6.1$better_non_favourite[1])])[1]
+data_b6.1_player2_2 <- pull(data_b6.1[paste0('player_', data_b6.1$better_non_favourite[2])])[2]
+data_b6.1_player2_3 <- pull(data_b6.1[paste0('player_', data_b6.1$better_non_favourite[3])])[3]
+
+# Event
+data_b6.1_event_1 <- pull(data_b6.1['event'])[1]
+data_b6.1_event_2 <- pull(data_b6.1['event'])[2]
+data_b6.1_event_3 <- pull(data_b6.1['event'])[3]
+
+# Time
+data_b6.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b6.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b6.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b6.1_money1_1 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_favourite[1], '_if_', data_b6.1$better_favourite[1], '_favourite')])[1], 2)
+data_b6.1_money1_2 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_favourite[2], '_if_', data_b6.1$better_favourite[1], '_favourite')])[2], 2)
+data_b6.1_money1_3 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_favourite[3], '_if_', data_b6.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b6.1_money2_1 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_non_favourite[1], '_if_', data_b6.1$better_favourite[1], '_favourite')])[1], 2)
+data_b6.1_money2_2 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_non_favourite[2], '_if_', data_b6.1$better_favourite[1], '_favourite')])[2], 2)
+data_b6.1_money2_3 <- round(pull(data_b6.1[paste0('to_bet_', data_b6.1$better_non_favourite[3], '_if_', data_b6.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b6.1_return_1 <- round(pull(data_b6.1[paste0('win_', data_b6.1$better_non_favourite[1], '_bet_', data_b6.1$better_favourite[1])])[1], 2)
+data_b6.1_return_2 <- round(pull(data_b6.1[paste0('win_', data_b6.1$better_non_favourite[2], '_bet_', data_b6.1$better_favourite[2])])[2], 2)
+data_b6.1_return_3 <- round(pull(data_b6.1[paste0('win_', data_b6.1$better_non_favourite[3], '_bet_', data_b6.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# Lvbet
+# Max return
+# =============================================================================
+
+# Max return
+data_b6.2 <- data_max_return %>% filter(player_1_bookmaker == "Lvbet" | player_2_bookmaker == "Lvbet")
+
+# Player 1 
+data_b6.2_player1_1 <- pull(data_b6.2[paste0('player_', data_b6.2$better_non_favourite[1])])[1]
+data_b6.2_player1_2 <- pull(data_b6.2[paste0('player_', data_b6.2$better_non_favourite[2])])[2]
+data_b6.2_player1_3 <- pull(data_b6.2[paste0('player_', data_b6.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b6.2_player2_1 <- pull(data_b6.2[paste0('player_', data_b6.2$better_favourite[1])])[1]
+data_b6.2_player2_2 <- pull(data_b6.2[paste0('player_', data_b6.2$better_favourite[2])])[2]
+data_b6.2_player2_3 <- pull(data_b6.2[paste0('player_', data_b6.2$better_favourite[3])])[3]
+
+# Event
+data_b6.2_event_1 <- pull(data_b6.2['event'])[1]
+data_b6.2_event_2 <- pull(data_b6.2['event'])[2]
+data_b6.2_event_3 <- pull(data_b6.2['event'])[3]
+
+# Time
+data_b6.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b6.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b6.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b6.2_money1_1 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_non_favourite[1], '_if_', data_b6.2$better_favourite[1], '_favourite')])[1], 2)
+data_b6.2_money1_2 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_non_favourite[2], '_if_', data_b6.2$better_favourite[1], '_favourite')])[2], 2)
+data_b6.2_money1_3 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_non_favourite[3], '_if_', data_b6.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b6.2_money2_1 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_favourite[1], '_if_', data_b6.2$better_favourite[1], '_favourite')])[1], 2)
+data_b6.2_money2_2 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_favourite[2], '_if_', data_b6.2$better_favourite[1], '_favourite')])[2], 2)
+data_b6.2_money2_3 <- round(pull(data_b6.2[paste0('to_bet_', data_b6.2$better_favourite[3], '_if_', data_b6.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b6.2_return_1 <- round(pull(data_b6.2[paste0('win_', data_b6.2$better_favourite[1], '_bet_', data_b6.2$better_favourite[1])])[1], 2)
+data_b6.2_return_2 <- round(pull(data_b6.2[paste0('win_', data_b6.2$better_favourite[2], '_bet_', data_b6.2$better_favourite[2])])[2], 2)
+data_b6.2_return_3 <- round(pull(data_b6.2[paste0('win_', data_b6.2$better_favourite[3], '_bet_', data_b6.2$better_favourite[3])])[3], 2)
+
+
+
+# =============================================================================
+# Totolotek
+# Min Adverse
+# =============================================================================
+#Player 1
+data_b7.1 <- data_min_adverse %>% filter(player_1_bookmaker == "Totolotek" | player_2_bookmaker == "Totolotek")
+data_b7.1_player1_1 <- pull(data_b7.1[paste0('player_', data_b7.1$better_favourite[1])])[1]
+data_b7.1_player1_2 <- pull(data_b7.1[paste0('player_', data_b7.1$better_favourite[2])])[2]
+data_b7.1_player1_3 <- pull(data_b7.1[paste0('player_', data_b7.1$better_favourite[3])])[3]
+
+# Player 2 
+data_b7.1_player2_1 <- pull(data_b7.1[paste0('player_', data_b7.1$better_non_favourite[1])])[1]
+data_b7.1_player2_2 <- pull(data_b7.1[paste0('player_', data_b7.1$better_non_favourite[2])])[2]
+data_b7.1_player2_3 <- pull(data_b7.1[paste0('player_', data_b7.1$better_non_favourite[3])])[3]
+
+# Event
+data_b7.1_event_1 <- pull(data_b7.1['event'])[1]
+data_b7.1_event_2 <- pull(data_b7.1['event'])[2]
+data_b7.1_event_3 <- pull(data_b7.1['event'])[3]
+
+# Time
+data_b7.1_time_1 <- pull(data_max_return['match_time'])[1]
+data_b7.1_time_2 <- pull(data_max_return['match_time'])[2]
+data_b7.1_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet 1
+data_b7.1_money1_1 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_favourite[1], '_if_', data_b7.1$better_favourite[1], '_favourite')])[1], 2)
+data_b7.1_money1_2 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_favourite[2], '_if_', data_b7.1$better_favourite[1], '_favourite')])[2], 2)
+data_b7.1_money1_3 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_favourite[3], '_if_', data_b7.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet 2
+data_b7.1_money2_1 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_non_favourite[1], '_if_', data_b7.1$better_favourite[1], '_favourite')])[1], 2)
+data_b7.1_money2_2 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_non_favourite[2], '_if_', data_b7.1$better_favourite[1], '_favourite')])[2], 2)
+data_b7.1_money2_3 <- round(pull(data_b7.1[paste0('to_bet_', data_b7.1$better_non_favourite[3], '_if_', data_b7.1$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b7.1_return_1 <- round(pull(data_b7.1[paste0('win_', data_b7.1$better_non_favourite[1], '_bet_', data_b7.1$better_favourite[1])])[1], 2)
+data_b7.1_return_2 <- round(pull(data_b7.1[paste0('win_', data_b7.1$better_non_favourite[2], '_bet_', data_b7.1$better_favourite[2])])[2], 2)
+data_b7.1_return_3 <- round(pull(data_b7.1[paste0('win_', data_b7.1$better_non_favourite[3], '_bet_', data_b7.1$better_favourite[3])])[3], 2)
+
+# =============================================================================
+# Totolotek
+# Max return
+# =============================================================================
+
+# Max return
+data_b7.2 <- data_max_return %>% filter(player_1_bookmaker == "Totolotek" | player_2_bookmaker == "Totolotek")
+
+# Player 1 
+data_b7.2_player1_1 <- pull(data_b7.2[paste0('player_', data_b7.2$better_non_favourite[1])])[1]
+data_b7.2_player1_2 <- pull(data_b7.2[paste0('player_', data_b7.2$better_non_favourite[2])])[2]
+data_b7.2_player1_3 <- pull(data_b7.2[paste0('player_', data_b7.2$better_non_favourite[3])])[3]
+
+# Player 2 
+data_b7.2_player2_1 <- pull(data_b7.2[paste0('player_', data_b7.2$better_favourite[1])])[1]
+data_b7.2_player2_2 <- pull(data_b7.2[paste0('player_', data_b7.2$better_favourite[2])])[2]
+data_b7.2_player2_3 <- pull(data_b7.2[paste0('player_', data_b7.2$better_favourite[3])])[3]
+
+# Event
+data_b7.2_event_1 <- pull(data_b7.2['event'])[1]
+data_b7.2_event_2 <- pull(data_b7.2['event'])[2]
+data_b7.2_event_3 <- pull(data_b7.2['event'])[3]
+
+# Time
+data_b7.2_time_1 <- pull(data_max_return['match_time'])[1]
+data_b7.2_time_2 <- pull(data_max_return['match_time'])[2]
+data_b7.2_time_3 <- pull(data_max_return['match_time'])[3]
+
+# Money to bet player 1
+data_b7.2_money1_1 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_non_favourite[1], '_if_', data_b7.2$better_favourite[1], '_favourite')])[1], 2)
+data_b7.2_money1_2 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_non_favourite[2], '_if_', data_b7.2$better_favourite[1], '_favourite')])[2], 2)
+data_b7.2_money1_3 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_non_favourite[3], '_if_', data_b7.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Money to bet player 2
+data_b7.2_money2_1 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_favourite[1], '_if_', data_b7.2$better_favourite[1], '_favourite')])[1], 2)
+data_b7.2_money2_2 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_favourite[2], '_if_', data_b7.2$better_favourite[1], '_favourite')])[2], 2)
+data_b7.2_money2_3 <- round(pull(data_b7.2[paste0('to_bet_', data_b7.2$better_favourite[3], '_if_', data_b7.2$better_favourite[1], '_favourite')])[3], 2)
+
+# Expected return
+data_b7.2_return_1 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favourite[1], '_bet_', data_b7.2$better_favourite[1])])[1], 2)
+data_b7.2_return_2 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favourite[2], '_bet_', data_b7.2$better_favourite[2])])[2], 2)
+data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favourite[3], '_bet_', data_b7.2$better_favourite[3])])[3], 2)
 
 
 ```
@@ -305,19 +839,130 @@ data_b1.2_return_3 <- round(pull(data_b1.2[paste0('win_', data_b1.2$better_favou
 
 *Minimum adverse*
 
-1. Bet `r data_b1.1_money_1` PLLN for `r data_b1.1_player_1` in `r data_b1.1_event_1` (starting `r data_b1.1_time_1`) with an expected return of `r data_b1.1_return_1`
+1. Bet `r data_b1.1_money1_1` PLN for `r data_b1.1_player1_1` and `r data_b1.1_money2_1` PLN for `r data_b1.1_player2_1` in `r data_b1.1_event_1` (starting `r data_b1.1_time_1`) with an expected return of `r data_b1.1_return_1`
 
-2. Bet `r data_b1.1_money_2` PLLN for `r data_b1.1_player_2` in `r data_b1.1_event_2` (starting `r data_b1.1_time_2`) with an expected return of `r data_b1.1_return_2`
+2. Bet `r data_b1.1_money1_2` PLN for `r data_b1.1_player1_2` and `r data_b1.1_money2_2` PLN for `r data_b1.1_player2_2` in `r data_b1.1_event_2` (starting `r data_b1.1_time_2`) with an expected return of `r data_b1.1_return_2`
 
-3. Bet `r data_b1.1_money_3` PLLN for `r data_b1.1_player_3` in `r data_b1.1_event_3` (starting `r data_b1.1_time_3`) with an expected return of `r data_b1.1_return_3`
+3. Bet `r data_b1.1_money1_3` PLN for `r data_b1.1_player1_3` and `r data_b1.1_money2_3` PLN for `r data_b1.1_player2_3` in `r data_b1.1_event_3` (starting `r data_b1.1_time_3`) with an expected return of `r data_b1.1_return_3`
 
 *Maximum return*
 
-1. Bet `r data_b1.2_money_1` PLLN for `r data_b1.2_player_1` in `r data_b1.2_event_1` (starting `r data_b1.2_time_1`) with an expected return of `r data_b1.2_return_1`
+1. Bet `r data_b1.2_money1_1` PLN for `r data_b1.2_player1_1` and `r data_b1.2_money2_1` PLN for `r data_b1.2_player2_1` in `r data_b1.2_event_1` (starting `r data_b1.2_time_1`) with an expected return of `r data_b1.2_return_1`
 
-2. Bet `r data_b1.2_money_2` PLLN for `r data_b1.2_player_2` in `r data_b1.2_event_2` (starting `r data_b1.2_time_2`) with an expected return of `r data_b1.2_return_2`
+2. Bet `r data_b1.2_money1_2` PLN for `r data_b1.2_player1_2` and `r data_b1.2_money2_2` PLN for `r data_b1.2_player2_2`in `r data_b1.2_event_2` (starting `r data_b1.2_time_2`) with an expected return of `r data_b1.2_return_2`
 
-3. Bet `r data_b1.2_money_3` PLLN for `r data_b1.2_player_3` in `r data_b1.2_event_3` (starting `r data_b1.2_time_3`) with an expected return of `r data_b1.2_return_3`
+3. Bet `r data_b1.2_money1_3` PLN for `r data_b1.2_player1_3` and `r data_b1.2_money2_3` PLN for `r data_b1.2_player2_3` in `r data_b1.2_event_3` (starting `r data_b1.2_time_3`) with an expected return of `r data_b1.2_return_3`
+
+
+**STS**
+
+*Minimum adverse*
+
+1. Bet `r data_b2.1_money1_1` PLN for `r data_b2.1_player1_1` and `r data_b2.1_money2_1` PLN for `r data_b2.1_player2_1` in `r data_b2.1_event_1` (starting `r data_b2.1_time_1`) with an expected return of `r data_b2.1_return_1`
+
+2. Bet `r data_b2.1_money1_2` PLN for `r data_b2.1_player1_2` and `r data_b2.1_money2_2` PLN for `r data_b2.1_player2_2` in `r data_b2.1_event_2` (starting `r data_b2.1_time_2`) with an expected return of `r data_b2.1_return_2`
+
+3. Bet `r data_b2.1_money1_3` PLN for `r data_b2.1_player1_3` and `r data_b2.1_money2_3` PLN for `r data_b2.1_player2_3` in `r data_b2.1_event_3` (starting `r data_b2.1_time_3`) with an expected return of `r data_b2.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b2.2_money1_1` PLN for `r data_b2.2_player1_1` and `r data_b2.2_money2_1` PLN for `r data_b2.2_player2_1` in `r data_b2.2_event_1` (starting `r data_b2.2_time_1`) with an expected return of `r data_b2.2_return_1`
+
+2. Bet `r data_b2.2_money1_2` PLN for `r data_b2.2_player1_2` and `r data_b2.2_money2_2` PLN for `r data_b2.2_player2_2`in `r data_b2.2_event_2` (starting `r data_b2.2_time_2`) with an expected return of `r data_b2.2_return_2`
+
+3. Bet `r data_b2.2_money1_3` PLN for `r data_b2.2_player1_3` and `r data_b2.2_money2_3` PLN for `r data_b2.2_player2_3` in `r data_b2.2_event_3` (starting `r data_b2.2_time_3`) with an expected return of `r data_b2.2_return_3`
+
+**Betclick**
+
+*Minimum adverse*
+
+1. Bet `r data_b3.1_money1_1` PLN for `r data_b3.1_player1_1` and `r data_b3.1_money2_1` PLN for `r data_b3.1_player2_1` in `r data_b3.1_event_1` (starting `r data_b3.1_time_1`) with an expected return of `r data_b3.1_return_1`
+
+2. Bet `r data_b3.1_money1_2` PLN for `r data_b3.1_player1_2` and `r data_b3.1_money2_2` PLN for `r data_b3.1_player2_2` in `r data_b3.1_event_2` (starting `r data_b3.1_time_2`) with an expected return of `r data_b3.1_return_2`
+
+3. Bet `r data_b3.1_money1_3` PLN for `r data_b3.1_player1_3` and `r data_b3.1_money2_3` PLN for `r data_b3.1_player2_3` in `r data_b3.1_event_3` (starting `r data_b3.1_time_3`) with an expected return of `r data_b3.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b3.2_money1_1` PLN for `r data_b3.2_player1_1` and `r data_b3.2_money2_1` PLN for `r data_b3.2_player2_1` in `r data_b3.2_event_1` (starting `r data_b3.2_time_1`) with an expected return of `r data_b3.2_return_1`
+
+2. Bet `r data_b3.2_money1_2` PLN for `r data_b3.2_player1_2` and `r data_b3.2_money2_2` PLN for `r data_b3.2_player2_2`in `r data_b3.2_event_2` (starting `r data_b3.2_time_2`) with an expected return of `r data_b3.2_return_2`
+
+3. Bet `r data_b3.2_money1_3` PLN for `r data_b3.2_player1_3` and `r data_b3.2_money2_3` PLN for `r data_b3.2_player2_3` in `r data_b3.2_event_3` (starting `r data_b3.2_time_3`) with an expected return of `r data_b3.2_return_3`
+
+**Betfan**
+
+*Minimum adverse*
+
+1. Bet `r data_b4.1_money1_1` PLN for `r data_b4.1_player1_1` and `r data_b4.1_money2_1` PLN for `r data_b4.1_player2_1` in `r data_b4.1_event_1` (starting `r data_b4.1_time_1`) with an expected return of `r data_b4.1_return_1`
+
+2. Bet `r data_b4.1_money1_2` PLN for `r data_b4.1_player1_2` and `r data_b4.1_money2_2` PLN for `r data_b4.1_player2_2` in `r data_b4.1_event_2` (starting `r data_b4.1_time_2`) with an expected return of `r data_b4.1_return_2`
+
+3. Bet `r data_b4.1_money1_3` PLN for `r data_b4.1_player1_3` and `r data_b4.1_money2_3` PLN for `r data_b4.1_player2_3` in `r data_b4.1_event_3` (starting `r data_b4.1_time_3`) with an expected return of `r data_b4.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b4.2_money1_1` PLN for `r data_b4.2_player1_1` and `r data_b4.2_money2_1` PLN for `r data_b4.2_player2_1` in `r data_b4.2_event_1` (starting `r data_b4.2_time_1`) with an expected return of `r data_b4.2_return_1`
+
+2. Bet `r data_b4.2_money1_2` PLN for `r data_b4.2_player1_2` and `r data_b4.2_money2_2` PLN for `r data_b4.2_player2_2`in `r data_b4.2_event_2` (starting `r data_b4.2_time_2`) with an expected return of `r data_b4.2_return_2`
+
+3. Bet `r data_b4.2_money1_3` PLN for `r data_b4.2_player1_3` and `r data_b4.2_money2_3` PLN for `r data_b4.2_player2_3` in `r data_b4.2_event_3` (starting `r data_b4.2_time_3`) with an expected return of `r data_b4.2_return_3`
+
+
+**Pzbuk**
+
+*Minimum adverse*
+
+1. Bet `r data_b5.1_money1_1` PLN for `r data_b5.1_player1_1` and `r data_b5.1_money2_1` PLN for `r data_b5.1_player2_1` in `r data_b5.1_event_1` (starting `r data_b5.1_time_1`) with an expected return of `r data_b5.1_return_1`
+
+2. Bet `r data_b5.1_money1_2` PLN for `r data_b5.1_player1_2` and `r data_b5.1_money2_2` PLN for `r data_b5.1_player2_2` in `r data_b5.1_event_2` (starting `r data_b5.1_time_2`) with an expected return of `r data_b5.1_return_2`
+
+3. Bet `r data_b5.1_money1_3` PLN for `r data_b5.1_player1_3` and `r data_b5.1_money2_3` PLN for `r data_b5.1_player2_3` in `r data_b5.1_event_3` (starting `r data_b5.1_time_3`) with an expected return of `r data_b5.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b5.2_money1_1` PLN for `r data_b5.2_player1_1` and `r data_b5.2_money2_1` PLN for `r data_b5.2_player2_1` in `r data_b5.2_event_1` (starting `r data_b5.2_time_1`) with an expected return of `r data_b5.2_return_1`
+
+2. Bet `r data_b5.2_money1_2` PLN for `r data_b5.2_player1_2` and `r data_b5.2_money2_2` PLN for `r data_b5.2_player2_2`in `r data_b5.2_event_2` (starting `r data_b5.2_time_2`) with an expected return of `r data_b5.2_return_2`
+
+3. Bet `r data_b5.2_money1_3` PLN for `r data_b5.2_player1_3` and `r data_b5.2_money2_3` PLN for `r data_b5.2_player2_3` in `r data_b5.2_event_3` (starting `r data_b5.2_time_3`) with an expected return of `r data_b5.2_return_3`
+
+
+**Lvbet**
+
+*Minimum adverse*
+
+1. Bet `r data_b6.1_money1_1` PLN for `r data_b6.1_player1_1` and `r data_b6.1_money2_1` PLN for `r data_b6.1_player2_1` in `r data_b6.1_event_1` (starting `r data_b6.1_time_1`) with an expected return of `r data_b6.1_return_1`
+
+2. Bet `r data_b6.1_money1_2` PLN for `r data_b6.1_player1_2` and `r data_b6.1_money2_2` PLN for `r data_b6.1_player2_2` in `r data_b6.1_event_2` (starting `r data_b6.1_time_2`) with an expected return of `r data_b6.1_return_2`
+
+3. Bet `r data_b6.1_money1_3` PLN for `r data_b6.1_player1_3` and `r data_b6.1_money2_3` PLN for `r data_b6.1_player2_3` in `r data_b6.1_event_3` (starting `r data_b6.1_time_3`) with an expected return of `r data_b6.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b6.2_money1_1` PLN for `r data_b6.2_player1_1` and `r data_b6.2_money2_1` PLN for `r data_b6.2_player2_1` in `r data_b6.2_event_1` (starting `r data_b6.2_time_1`) with an expected return of `r data_b6.2_return_1`
+
+2. Bet `r data_b6.2_money1_2` PLN for `r data_b6.2_player1_2` and `r data_b6.2_money2_2` PLN for `r data_b6.2_player2_2`in `r data_b6.2_event_2` (starting `r data_b6.2_time_2`) with an expected return of `r data_b6.2_return_2`
+
+3. Bet `r data_b6.2_money1_3` PLN for `r data_b6.2_player1_3` and `r data_b6.2_money2_3` PLN for `r data_b6.2_player2_3` in `r data_b6.2_event_3` (starting `r data_b6.2_time_3`) with an expected return of `r data_b6.2_return_3`
+
+**Totolotek**
+
+*Minimum adverse*
+
+1. Bet `r data_b7.1_money1_1` PLN for `r data_b7.1_player1_1` and `r data_b7.1_money2_1` PLN for `r data_b7.1_player2_1` in `r data_b7.1_event_1` (starting `r data_b7.1_time_1`) with an expected return of `r data_b7.1_return_1`
+
+2. Bet `r data_b7.1_money1_2` PLN for `r data_b7.1_player1_2` and `r data_b7.1_money2_2` PLN for `r data_b7.1_player2_2` in `r data_b7.1_event_2` (starting `r data_b7.1_time_2`) with an expected return of `r data_b7.1_return_2`
+
+3. Bet `r data_b7.1_money1_3` PLN for `r data_b7.1_player1_3` and `r data_b7.1_money2_3` PLN for `r data_b7.1_player2_3` in `r data_b7.1_event_3` (starting `r data_b7.1_time_3`) with an expected return of `r data_b7.1_return_3`
+
+*Maximum return*
+
+1. Bet `r data_b7.2_money1_1` PLN for `r data_b7.2_player1_1` and `r data_b7.2_money2_1` PLN for `r data_b7.2_player2_1` in `r data_b7.2_event_1` (starting `r data_b7.2_time_1`) with an expected return of `r data_b7.2_return_1`
+
+2. Bet `r data_b7.2_money1_2` PLN for `r data_b7.2_player1_2` and `r data_b7.2_money2_2` PLN for `r data_b7.2_player2_2`in `r data_b7.2_event_2` (starting `r data_b7.2_time_2`) with an expected return of `r data_b7.2_return_2`
+
+3. Bet `r data_b7.2_money1_3` PLN for `r data_b7.2_player1_3` and `r data_b7.2_money2_3` PLN for `r data_b7.2_player2_3` in `r data_b7.2_event_3` (starting `r data_b7.2_time_3`) with an expected return of `r data_b7.2_return_3`
 
 
 **Disclaimer**
