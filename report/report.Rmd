@@ -1045,7 +1045,149 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b7.2_money1_3` PLN for `r data_b7.2_player1_3` and `r data_b7.2_money2_3` PLN for `r data_b7.2_player2_3` in `r data_b7.2_event_3` (starting `r data_b7.2_time_3`) with an expected return of `r data_b7.2_return_3`
 
+```{r charts_data, echo=FALSE,include=FALSE}
+# Preparing data for visualizations of the trade-off
 
+data <-
+  data %>% mutate(gender = case_when(str_detect(event, "Womens") ~ "W",
+                                     str_detect(event, "WTP") ~ "W",
+                                     TRUE ~ "M"))
+# =================
+# General
+# =================
+data_trade_off_plot_general <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return) %>% 
+  summarise(adv_return = max(better_adverse_return))
+# =================
+# Gender
+# =================
+data_trade_off_plot_gender <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return,gender) %>% 
+  summarise(adv_return = max(better_adverse_return))
+# =================
+# Bookmaker
+# =================
+data_trade_off_plot_bookmaker <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money,
+         bookmaker = ifelse(win_1_bet_2_return>win_2_bet_1_return,player_1_bookmaker,player_2_bookmaker)) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return,bookmaker) %>% 
+  summarise(adv_return = max(better_adverse_return))
+
+```
+
+```{r charts_ratio, echo=FALSE,warning=FALSE}
+# Plottning trade-off scenarios 
+
+library(viridis)
+library(hrbrthemes)
+
+
+data_trade_off_plot_general %>%
+  ggplot(aes(
+    x = exp_return,
+    y = adv_return
+  )) +
+  geom_line() +
+  geom_point(size=3) +
+  geom_text(aes(label=round(adv_return,2)),hjust=0, vjust=-0.5) +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Expected return and advere return relation") +
+  theme_ipsum() +
+  ylab("Level of adverse return") +
+  xlab("Level of expected return")
+
+
+data_trade_off_plot_gender %>%
+  ggplot(aes(
+    x = exp_return,
+    y = adv_return,
+    group = gender,
+    color = gender
+  )) +
+  geom_line() +
+  geom_point(aes(fill=gender),size=3) +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Expected return and advere return relation - Gender") +
+  theme_ipsum() +
+  ylab("Level of adverse return") +
+  xlab("Level of expected return")
+
+
+data_trade_off_plot_bookmaker %>%
+  ggplot(aes(
+    x = exp_return,
+    y = adv_return,
+    group = bookmaker,
+    color = bookmaker
+  )) +
+  geom_line() +
+  geom_point(aes(fill=bookmaker),size=3) +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Expected return and advere return relation - Bookmaker") +
+  theme_ipsum() +
+  ylab("Level of adverse return") +
+  xlab("Level of expected return")
+
+```
 
 **Disclaimer**
 
