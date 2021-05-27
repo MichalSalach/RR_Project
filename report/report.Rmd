@@ -26,20 +26,36 @@ params:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r libraries, echo=FALSE,include=FALSE}
+# Loading required libraries
 
-```{r pressure, echo=FALSE,include=FALSE}
+library(viridis)      # 0.6.1
+library(hrbrthemes)   # 0.8.0
+library(knitr)        # 1.33
+library(rmarkdown)    #2.7
+library(lubridate)    #1.7.10
+library(tidyverse)    # 1.3.1
+library(httr)         # 1.4.2
+library(rvest)        # 1.0.0
+library(lubridate)    # 1.7.10
+library(jsonlite)     # 1.7.2
+library(eList)        # 0.2.0
+
+```
+
+
+```{r data_preparation, echo=FALSE,include=FALSE,warning=FALSE}
 library(tidyverse)  # tidyverse 1.3.1
 
-# Note: I use the function if_any() from dplyr 1.0.5, which was not included in some of the 
-# earlier versions of the package.
 
 #### Data ####
-#data <- read_csv('../data_060521_163644.csv')
-data <- read_csv('../data_270521_001719.csv') # New data 27.05
+data_raw <- read_csv('../data/data_270521_032950.csv') # New data 27.05
+data <- data_raw
 
 # A list of bookmakers
 bookmakers <- c('eFortuna', 'STS', 'Betclic', 'Betfan', 'Pzbuk', 'Lvbet', 'Totolotek')
 
+# Links to bookmakers websites
 bookmakers_links <- c('https://www.efortuna.pl/',
                       'https://www.sts.pl/',
                       'https://www.betclic.pl/',
@@ -48,24 +64,25 @@ bookmakers_links <- c('https://www.efortuna.pl/',
                       'https://lvbet.pl/pl/',
                       'https://www.totolotek.pl/pl')
 
+# Creating dataframe for lookup 
 bookmakers_df <- data.frame(bookmakers,bookmakers_links)
 
-# Add a match identifier and a boolean for whether a match is ongoing, or future (it's the case
-# when there is no data for games).
-# Then transform data to long format (match-bookmaker-value in separate columns) and count max
-# and min offers for both players in a match.
 
-# Translate Polish tennis specific terms and countries name to English
-dict <- read_csv('translation-20210524.csv') #Change working directory to main
+# Translating Polish tennis specific terms and countries name to English
+# Loading pre-made dictionary 
+dict <- read_csv('../data/translation-20210524.csv') #Change working directory to main
+
+# Loop for detecting string matches and translating them
 for (i in 1:length(dict$pl)) {
   
   data$event <- as.data.frame(sapply(data$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
 
 }
 
-
+# Saving translated list of values as a part of dataframe and renaming it
 data <- as.data.frame(do.call(cbind, data)) %>% rename(event=`sapply(data$event, gsub, pattern = dict[i, ]$pl, replacement = dict[i, ]$angl)`)
 
+# Reshaping data to long format
 data <- data %>%
   mutate(match_id = row_number(), .before = event) %>%
   mutate(match_current = if_else(if_any(contains('_games'), function(x)
@@ -152,7 +169,7 @@ data_max_return <- data %>%
   arrange(desc(better_return))
 
 
-
+# Creating transition dataframe for matching bookmaker and their corresponding website
 book <- pull(data_max_return[paste0('player_', data_max_return$better_non_favourite[1], '_bookmaker')])[1]
 link <- bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', data_min_adverse$better_non_favourite[1], '_bookmaker')])[1]) %>% select(bookmakers_links)
 
@@ -208,8 +225,9 @@ The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul
 # ==============================================================================
 # Preparation of data for tables
 # ==============================================================================
-df <- read_csv('../data_270521_001719.csv')
-dict <- read_csv('translation-20210524.csv')
+#df <- read_csv('../data_270521_001719.csv')
+df <- data_raw
+
 for (i in 1:length(dict$pl)) {
   
   df$event <- as.data.frame(sapply(df$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
@@ -272,7 +290,7 @@ Having `r money` PLN, the best bet to do right now in order to have `r 100*expec
 
 
 ```{r variables2, echo=FALSE,include=FALSE}
-# List of variable for inline referencing
+#  Creating lists of variables for inline referencing 
 
 value_to_bet_ <- round(pull(data_max_return[paste0('to_bet_', data_max_return$better_non_favourite[1], '_if_', data_max_return$better_favourite[1], '_favourite')])[1], 2)
 
@@ -304,7 +322,7 @@ match_time_ <- pull(data_max_return['match_time'])[1]
 Having `r money` PLN, the best bet to do right now in order to have maximum`r 100*adverse_return`% return in the case of a favorite loss and maximal return in the case of the favorite win is to bet `r value_to_bet_`PLN on `r player_to_bet_for_` (`r player_to_bet_for_nationality_`, ATP ranking: `r player_to_bet_for_atp_ranking_`) on [`r best_bet_bookmaker_`](`r best_bet_bookmaker_link_`) (betting odds: `r best_bet_betting_odds_`, expected return: `r expected_return_pln_` PLN, that is `r expected_return_percentage_`%) and `r value_to_bet2_` PLN on `r player_to_bet_for2_` (`r player_to_bet_for_nationality2_`, ATP ranking: `r player_to_bet_for_atp_ranking2_`) on [`r best_bet_bookmaker2_`](`r best_bet_bookmaker_link2_`) (betting odds: `r best_bet_betting_odds2_`) in `r event_` (starting `r match_time_`)
 
 ```{r variables_top3_for_each_bookmaker, echo=FALSE,include=FALSE}
-# List of variable for inline referencing
+# Creating list of variable for inline referencing
 
 # =============================================================================
 # eFortuna
@@ -1027,150 +1045,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b7.2_money1_3` PLN for `r data_b7.2_player1_3` and `r data_b7.2_money2_3` PLN for `r data_b7.2_player2_3` in `r data_b7.2_event_3` (starting `r data_b7.2_time_3`) with an expected return of `r data_b7.2_return_3`
 
-```{r charts_data, echo=FALSE,include=FALSE}
 
-data <- #This should be higher up 
-  data %>% mutate(gender = case_when(str_detect(event, "Womens") ~ "W",
-                                     str_detect(event, "WTP") ~ "W",
-                                     TRUE ~ "M"))
-
-# =================
-# General
-# =================
-data_trade_off_plot_general <- data %>% 
-  slice(rep(1:n(), each = 12)) %>% 
-  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
-  group_by(match_id) %>%
-  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
-         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
-         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
-         win_2_bet_1_return = (win_2_bet_1-money)/money,
-         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
-         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
-         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
-         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
-  rowwise() %>% 
-  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
-  ungroup() %>% 
-  filter(player_1_odds == player_1_odds_max,
-         player_2_odds == player_2_odds_max,
-         to_bet_1_if_1_favourite <= money,
-         to_bet_1_if_2_favourite >= 0,
-         to_bet_2_if_2_favourite <= money,
-         to_bet_2_if_1_favourite >= 0) %>%
-  group_by(exp_return) %>% 
-  summarise(adv_return = max(better_adverse_return))
-
-# =================
-# Gender
-# =================
-data_trade_off_plot_gender <- data %>% 
-  slice(rep(1:n(), each = 12)) %>% 
-  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
-  group_by(match_id) %>%
-  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
-         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
-         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
-         win_2_bet_1_return = (win_2_bet_1-money)/money,
-         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
-         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
-         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
-         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
-  rowwise() %>% 
-  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
-  ungroup() %>% 
-  filter(player_1_odds == player_1_odds_max,
-         player_2_odds == player_2_odds_max,
-         to_bet_1_if_1_favourite <= money,
-         to_bet_1_if_2_favourite >= 0,
-         to_bet_2_if_2_favourite <= money,
-         to_bet_2_if_1_favourite >= 0) %>%
-  group_by(exp_return,gender) %>% 
-  summarise(adv_return = max(better_adverse_return))
-
-# =================
-# Bookmaker
-# =================
-data_trade_off_plot_bookmaker <- data %>% 
-  slice(rep(1:n(), each = 12)) %>% 
-  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
-  group_by(match_id) %>%
-  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
-         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
-         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
-         win_2_bet_1_return = (win_2_bet_1-money)/money,
-         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
-         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
-         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
-         win_1_bet_2_return = (win_1_bet_2-money)/money,
-         bookmaker = ifelse(win_1_bet_2_return>win_2_bet_1_return,player_1_bookmaker,player_2_bookmaker)) %>% 
-  rowwise() %>% 
-  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
-  ungroup() %>% 
-  filter(player_1_odds == player_1_odds_max,
-         player_2_odds == player_2_odds_max,
-         to_bet_1_if_1_favourite <= money,
-         to_bet_1_if_2_favourite >= 0,
-         to_bet_2_if_2_favourite <= money,
-         to_bet_2_if_1_favourite >= 0) %>%
-  group_by(exp_return,bookmaker) %>% 
-  summarise(adv_return = max(better_adverse_return))
-
-```
-
-```{r charts_ratio, echo=FALSE,warning=FALSE}
-
-library(viridis)
-library(hrbrthemes)
-
-
-data_trade_off_plot_general %>%
-  ggplot(aes(
-    x = exp_return,
-    y = adv_return
-  )) +
-  geom_line() +
-  geom_point(size=3) +
-  geom_text(aes(label=round(adv_return,2)),hjust=0, vjust=-0.5) +
-  scale_color_viridis(discrete = TRUE) +
-  ggtitle("Expected return and advere return relation") +
-  theme_ipsum() +
-  ylab("Level of adverse return") +
-  xlab("Level of expected return")
-
-
-data_trade_off_plot_gender %>%
-  ggplot(aes(
-    x = exp_return,
-    y = adv_return,
-    group = gender,
-    color = gender
-  )) +
-  geom_line() +
-  geom_point(aes(fill=gender),size=3) +
-  scale_color_viridis(discrete = TRUE) +
-  ggtitle("Expected return and advere return relation - Gender") +
-  theme_ipsum() +
-  ylab("Level of adverse return") +
-  xlab("Level of expected return")
-
-
-data_trade_off_plot_bookmaker %>%
-  ggplot(aes(
-    x = exp_return,
-    y = adv_return,
-    group = bookmaker,
-    color = bookmaker
-  )) +
-  geom_line() +
-  geom_point(aes(fill=bookmaker),size=3) +
-  scale_color_viridis(discrete = TRUE) +
-  ggtitle("Expected return and advere return relation - Bookmaker") +
-  theme_ipsum() +
-  ylab("Level of adverse return") +
-  xlab("Level of expected return")
-
-```
 
 **Disclaimer**
 

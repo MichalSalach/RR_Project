@@ -49,107 +49,188 @@
 <h1>Best bet prediction</h1>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>In our project, we search for the most profitable bets to make on the tennis matches for a given moment. We consider seven popular Polish bookmakers whose betting odds are reported on an ongoing basis on flashscore.pl/tennis. We are interested in the results only (who wins) and only in the ongoing or scheduled matches for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match, there is a favorite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the odds for both players are the same - this does not cause a problem for our analysis). A favorite of a bookmaker in a given match is the player for whom offers are lower (closer to 1). There is also a favorite of a client of the bookmaker - this is the player whose win would grant the client a profit. Given that in reality, offers for both players are greater than 1, a client does not have to bet all their money on a favorite to achieve some profit. The remaining amount of money the client would bet on a non-favorite as a form of insurance in the case of misfortune (favorite loses). A no-risk bet is, therefore, a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favorite loses. For example, in betting, odds for a player A (the bookmaker’s favorite) are 1.5, and for a player, B is 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the project aims to find the offers that come the closest to this, for any moment in time. Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client’s favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite’s win, having fixed on some level the loss in the adverse case. The report will therefore accept 3 meta-prameters: <em>money</em> (money to bet, defaul 1000 PLN), <em>expected_return</em> (defaul 0.1) and <em>adverse_return</em> (default -0.2).</p>
+<p>In our project, we search for the most profitable bets to make on the tennis matches for a given moment. We consider seven popular Polish bookmakers whose betting odds are reported on an ongoing basis on flashscore.pl/tennis. We are interested in the results only (who wins) and only in the ongoing or scheduled matches for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match, there is a favorite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the odds for both players are the same - this does not cause a problem for our analysis). A favorite of a bookmaker in a given match is the player for whom offers are lower (closer to 1). There is also a favorite of a client of the bookmaker - this is the player whose win would grant the client a profit.</p>
+<p>Given that in reality, offers for both players are greater than 1, a client does not have to bet all their money on a favorite to achieve some profit. The remaining amount of money the client would bet on a non-favorite as a form of insurance in the case of misfortune (favorite loses). A no-risk bet is, therefore, a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favorite loses. For example, in betting, odds for a player A (the bookmaker’s favorite) are 1.5, and for a player, B is 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the project aims to find the offers that come the closest to this, for any moment in time.</p>
+<p>Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client’s favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite’s win, having fixed on some level the loss in the adverse case. The report will therefore accept 3 meta-prameters: <em>money</em> (money to bet, defaul 1000 PLN), <em>expected_return</em> (defaul 0.1) and <em>adverse_return</em> (default -0.2).</p>
+<div id="summary-statistics" class="section level3">
+<h3>Summary statistics</h3>
+<table style="width:100%;">
+<colgroup>
+<col width="20%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">eFortuna</th>
+<th align="right">STS</th>
+<th align="right">Betclick</th>
+<th align="right">Betfan</th>
+<th align="right">Lvbet</th>
+<th align="right">Pzbuk</th>
+<th align="right">Totolotek</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Bookmaker bet count</td>
+<td align="right">178.000000</td>
+<td align="right">177.000000</td>
+<td align="right">172.000000</td>
+<td align="right">158.000000</td>
+<td align="right">169.000000</td>
+<td align="right">157.000000</td>
+<td align="right">55.000000</td>
+</tr>
+<tr class="even">
+<td align="left">Average bet size</td>
+<td align="right">2.499101</td>
+<td align="right">2.502881</td>
+<td align="right">2.457151</td>
+<td align="right">2.542468</td>
+<td align="right">2.579645</td>
+<td align="right">2.611465</td>
+<td align="right">2.302182</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="17%" />
+<col width="14%" />
+<col width="18%" />
+<col width="15%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Total count</th>
+<th align="right">Women matches</th>
+<th align="right">Men matches</th>
+<th align="left">Number of bets</th>
+<th align="right">Live matches</th>
+<th align="right">Planned matches</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">255</td>
+<td align="right">94</td>
+<td align="right">161</td>
+<td align="left">182</td>
+<td align="right">0</td>
+<td align="right">255</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div id="best-bet-in-case-the-favourite-wins" class="section level3">
 <h3>Best bet in case the favourite wins</h3>
-<p>Having 1000 PLN, the best bet to do right now in order to have 10% return in the case of a favorite win and minimal loss in the case of the favorite loss is to bet 244.44 PLN on Federico Delbonis (Arg, ATP ranking: 77) on <a href="https://www.pzbuk.pl/pl">Pzbuk</a> (betting odds: 4.5) and 755.56 PLN on Matteo Berrettini (Ita, ATP ranking: 10) on <a href="https://www.efortuna.pl/">eFortuna</a> (betting odds: 1.3, expected return: 982.22 PLN, that is -1.78%) in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00).</p>
+<p>Having 1000 PLN, the best bet to do right now in order to have 10% return in the case of a favorite win and minimal loss in the case of the favorite loss is to bet 209.52 PLN on Mohamed Safwat (Egy, ATP ranking: 162) on <a href="https://www.pzbuk.pl/pl">Pzbuk</a> (betting odds: 5.25) and 790.48 PLN on Juan Manuel Cerundolo (Arg, ATP ranking: 147) on <a href="https://lvbet.pl/pl/">Lvbet</a> (betting odds: 1.22, expected return: 964.38 PLN, that is -3.56%) in ATP - Single: French Open (France) - qualifications, grass courts - semi-finals (starting 2021-05-27 10:30:00).</p>
 </div>
 <div id="best-bet-in-case-the-favourite-loses" class="section level3">
 <h3>Best bet in case the favourite loses</h3>
-<p>Having 1000 PLN, the best bet to do right now in order to have maximum-20% return in the case of a favorite loss and maximal return in the case of the favorite win is to bet 615.38PLN on Matteo Berrettini (Ita, ATP ranking: 10) on <a href="https://www.efortuna.pl/">eFortuna</a> (betting odds: 1.3, expected return: 1730.77 PLN, that is 73.08%) and 384.62 PLN on Federico Delbonis (Arg, ATP ranking: 77) on <a href="https://www.pzbuk.pl/pl">Pzbuk</a> (betting odds: 4.5) in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00)</p>
+<p>Having 1000 PLN, the best bet to do right now in order to have maximum-20% return in the case of a favorite loss and maximal return in the case of the favorite win is to bet 784.31PLN on Novak Djokovic (Srb, ATP ranking: 1) on <a href="https://www.efortuna.pl/">eFortuna</a> (betting odds: 1.02, expected return: 5392.16 PLN, that is 439.22%) and 215.69 PLN on Federico Coria (Arg, ATP ranking: 96) on <a href="https://www.efortuna.pl/">eFortuna</a> (betting odds: 25) in ATP - Single: Belgrade 2 (Serbia), grass courts - quarter finals (starting 2021-05-27 14:00:00)</p>
 </div>
 <div id="top-3-bets-for-each-bookmaker" class="section level3">
 <h3>Top 3 bets for each bookmaker</h3>
 <p><strong>eFortuna</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 244.44 PLN for Federico Delbonis and 755.56 PLN for Matteo Berrettini in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 982.22</p></li>
-<li><p>Bet 126.98 PLN for Daniel Evans and 873.02 PLN for Alexander Zverev in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 965.11</p></li>
-<li><p>Bet 234.04 PLN for Anastazja Pawluczenkowa and 765.96 PLN for Aryna Sabalenka in WTA - Single: Madryt (Spain), grass courts - Półfinał (starting 06-05-2021 20:30:00) with an expected return of 942.13</p></li>
+<li><p>Bet 234.04 PLN for Monica Niculescu and 765.96 PLN for Maria Camila Osorio Serrano in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 14:00:00) with an expected return of 926.81</p></li>
+<li><p>Bet 250 PLN for Marc Polmans and 750 PLN for Bernabe Zapata Miralles in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 922.5</p></li>
+<li><p>Bet 282.05 PLN for Shuai Zhang and 717.95 PLN for Sorana-Mihaela Cirstea in WTA - Single: Strasbourg (France), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 918.97</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 615.38 PLN for Matteo Berrettini and 384.62 PLN for Federico Delbonis in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 1730.77</p></li>
-<li><p>Bet 829.79 PLN for Alexander Zverev and 170.21 PLN for Daniel Evansin ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 1715.87</p></li>
-<li><p>Bet 650.41 PLN for Aryna Sabalenka and 349.59 PLN for Anastazja Pawluczenkowa in WTA - Single: Madryt (Spain), grass courts - Półfinał (starting 06-05-2021 20:30:00) with an expected return of 1643.09</p></li>
+<li><p>Bet 784.31 PLN for Novak Djokovic and 215.69 PLN for Federico Coria in ATP - Single: Belgrade 2 (Serbia), grass courts - quarter finals (starting 2021-05-27 14:00:00) with an expected return of 5392.16</p></li>
+<li><p>Bet 927.27 PLN for Diego Fernandez Flores and 72.73 PLN for Fouad Behbehaniin ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 920 PLN for Yunseong Chung and 80 PLN for Yuta Kikuchi in ITF Mens - Single: M15 Monastir 14 (Tunisia), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2233.01</p></li>
 </ol>
 <p><strong>STS</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 241.76 PLN for Casper Ruud and 758.24 PLN for Stefanos Tsitsipas in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 947.8</p></li>
-<li><p>Bet 268.29 PLN for Arina Rodionowa and 731.71 PLN for Harriet Dart in ITF Womens - Single: W100 Charleston, SC (USA), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 892.68</p></li>
-<li><p>Bet 275 PLN for Federica Prati / Julia Stamatova and 725 PLN for Gozal Ainitdinova / Anna Kubareva 0:2 in ITF Womens - DEBEL: W15 Monastir (Tunisia), hard courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 884.5</p></li>
+<li><p>Bet 261.9 PLN for En Shuo Liang and 738.1 PLN for Harriet Dart in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 14:00:00) with an expected return of 922.62</p></li>
+<li><p>Bet 98.36 PLN for Yuki Mochizuki and 901.64 PLN for Ryan Peniston in ITF Mens - Single: M15 Heraklion 8 (Greece), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 921.78</p></li>
+<li><p>Bet 169.23 PLN for Sem Wensveen and 830.77 PLN for Himeno Sakatsume in ITF Womens - Single: W15 Monastir 14 (Tunisia), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 913.85</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 640 PLN for Stefanos Tsitsipas and 360 PLN for Casper Ruud in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 1638</p></li>
-<li><p>Bet 655.74 PLN for Harriet Dart and 344.26 PLN for Arina Rodionowain ITF Womens - Single: W100 Charleston, SC (USA), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 1411.48</p></li>
-<li><p>Bet 655.74 PLN for Gozal Ainitdinova / Anna Kubareva 0:2 and 344.26 PLN for Federica Prati / Julia Stamatova in ITF Womens - DEBEL: W15 Monastir (Tunisia), hard courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 1377.05</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 776.7 PLN for Yunseong Chung and 223.3 PLN for Yuta Kikuchiin ITF Mens - Single: M15 Monastir 14 (Tunisia), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2233.01</p></li>
+<li><p>Bet 917.95 PLN for Ylena In-Albon and 82.05 PLN for Chelsea Vanhoutte in ITF Womens - Single: W15 Antalya (Turkey), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2177.18</p></li>
 </ol>
 <p><strong>Betclick</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 323.53 PLN for Miyabi Inoue / Akiko Omae and 676.47 PLN for Jodie Anna Burrage / Paige Mary Hourigan in ITF Womens - DEBEL: W25 Salinas (Ecuador), hard courts - quarter finals (starting 06-05-2021 18:30:00) with an expected return of 859.12</p></li>
-<li><p>Bet 379.31 PLN for Yuriko Lily Miyazaki / Ayaka Okuno and 620.69 PLN for Sofia Shapatava / Panna Udvardy in ITF Womens - DEBEL: W25 Naples, FL (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 831.72</p></li>
-<li><p>Bet 345.24 PLN for Carol Zhao and 654.76 PLN for Paige Mary Hourigan in ITF Womens - Single: W25 Salinas (Ecuador), hard courts - 1/8 final (starting 06-05-2021 20:30:00) with an expected return of 800</p></li>
+<li><p>Bet 234.04 PLN for Monica Niculescu and 765.96 PLN for Maria Camila Osorio Serrano in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 14:00:00) with an expected return of 926.81</p></li>
+<li><p>Bet 250 PLN for Marc Polmans and 750 PLN for Bernabe Zapata Miralles in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 922.5</p></li>
+<li><p>Bet 282.05 PLN for Shuai Zhang and 717.95 PLN for Sorana-Mihaela Cirstea in WTA - Single: Strasbourg (France), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 918.97</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 629.92 PLN for Jodie Anna Burrage / Paige Mary Hourigan and 370.08 PLN for Miyabi Inoue / Akiko Omae in ITF Womens - DEBEL: W25 Salinas (Ecuador), hard courts - quarter finals (starting 06-05-2021 18:30:00) with an expected return of 1258.27</p></li>
-<li><p>Bet 597.01 PLN for Sofia Shapatava / Panna Udvardy and 402.99 PLN for Yuriko Lily Miyazaki / Ayaka Okunoin ITF Womens - DEBEL: W25 Naples, FL (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 1168.66</p></li>
-<li><p>Bet 619.05 PLN for Paige Mary Hourigan and 380.95 PLN for Carol Zhao in ITF Womens - Single: W25 Salinas (Ecuador), hard courts - 1/8 final (starting 06-05-2021 20:30:00) with an expected return of 1100</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 776.7 PLN for Yunseong Chung and 223.3 PLN for Yuta Kikuchiin ITF Mens - Single: M15 Monastir 14 (Tunisia), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2233.01</p></li>
+<li><p>Bet 784.31 PLN for Gauthier Onclin and 215.69 PLN for Luka Todorovic in ITF Mens - Single: M25 Kiseljak (Bośnia i Hercegowina), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2156.86</p></li>
 </ol>
 <p><strong>Betfan</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 234.04 PLN for Daniel Evans and 765.96 PLN for Alexander Zverev in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 965.11</p></li>
-<li><p>Bet 241.76 PLN for Casper Ruud and 758.24 PLN for Stefanos Tsitsipas in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 947.8</p></li>
-<li><p>Bet 246.58 PLN for Marc Polmans / Serhij Stachowski and 753.42 PLN for Denys Molchanov / Aleksandr Niedowiesow Aleksandr in CHALLENGER Mens - DEBEL: Praga (Czechy), grass courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 886.43</p></li>
+<li><p>Bet 301.37 PLN for Ilja Marczenko and 698.63 PLN for Botic Van De Zandschulp in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 14:00:00) with an expected return of 950.14</p></li>
+<li><p>Bet 90.91 PLN for Monica Niculescu and 909.09 PLN for Maria Camila Osorio Serrano in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 926.81</p></li>
+<li><p>Bet 90.91 PLN for Monica Niculescu and 909.09 PLN for Maria Camila Osorio Serrano in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 926.81</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 634.92 PLN for Alexander Zverev and 365.08 PLN for Daniel Evans in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 1715.87</p></li>
-<li><p>Bet 640 PLN for Stefanos Tsitsipas and 360 PLN for Casper Ruudin ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 1638</p></li>
-<li><p>Bet 655.74 PLN for Gozal Ainitdinova / Anna Kubareva 0:2 and 344.26 PLN for Federica Prati / Julia Stamatova in ITF Womens - DEBEL: W15 Monastir (Tunisia), hard courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 1377.05</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 776.7 PLN for Yunseong Chung and 223.3 PLN for Yuta Kikuchiin ITF Mens - Single: M15 Monastir 14 (Tunisia), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2233.01</p></li>
+<li><p>Bet 917.95 PLN for Ylena In-Albon and 82.05 PLN for Chelsea Vanhoutte in ITF Womens - Single: W15 Antalya (Turkey), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2177.18</p></li>
 </ol>
 <p><strong>Pzbuk</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 244.44 PLN for Federico Delbonis and 755.56 PLN for Matteo Berrettini in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 982.22</p></li>
-<li><p>Bet 268.29 PLN for Erin Routliffe / Aldila Sutjiadi and 731.71 PLN for Caty McNally / Storm Sanders in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 914.63</p></li>
-<li><p>Bet 83.33 PLN for Edoardo Eremin / Antonio Massara and 916.67 PLN for Peter Heller / Jeroen Vanneste in ITF Mens - DEBEL: M15 Antalya (Turkey), grass courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 896.55</p></li>
+<li><p>Bet 209.52 PLN for Mohamed Safwat and 790.48 PLN for Juan Manuel Cerundolo in ATP - Single: French Open (France) - qualifications, grass courts - semi-finals (starting 2021-05-27 14:00:00) with an expected return of 964.38</p></li>
+<li><p>Bet 289.47 PLN for Joao Menezes and 710.53 PLN for Carlos Taberner in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 945</p></li>
+<li><p>Bet 278.48 PLN for Jewgienij Philippov / Beibit Zhukayev and 721.52 PLN for Andrey Chepelev / Alexander Shevchenko in ITF Mens - DEBEL: M15 Shymkent (Kazakhstan), grass courts - quarter finals (starting 2021-05-27 09:30:00) with an expected return of 923.54</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 615.38 PLN for Matteo Berrettini and 384.62 PLN for Federico Delbonis in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 1730.77</p></li>
-<li><p>Bet 640 PLN for Caty McNally / Storm Sanders and 360 PLN for Erin Routliffe / Aldila Sutjiadiin ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 1476</p></li>
-<li><p>Bet 816.09 PLN for Peter Heller / Jeroen Vanneste and 183.91 PLN for Edoardo Eremin / Antonio Massara in ITF Mens - DEBEL: M15 Antalya (Turkey), grass courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 1450</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehaniin ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2287.13</p></li>
 </ol>
 <p><strong>Lvbet</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 268.29 PLN for Erin Routliffe / Aldila Sutjiadi and 731.71 PLN for Caty McNally / Storm Sanders in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 18:30:00) with an expected return of 914.63</p></li>
-<li><p>Bet 268.29 PLN for Erin Routliffe / Aldila Sutjiadi and 731.71 PLN for Caty McNally / Storm Sanders in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 914.63</p></li>
-<li><p>Bet 230.77 PLN for Alexander Bublik / Cristian Garin and 769.23 PLN for Sander Gille / Joran Vliegen in ATP - DEBEL: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 20:30:00) with an expected return of 896.78</p></li>
+<li><p>Bet 209.52 PLN for Mohamed Safwat and 790.48 PLN for Juan Manuel Cerundolo in ATP - Single: French Open (France) - qualifications, grass courts - semi-finals (starting 2021-05-27 14:00:00) with an expected return of 964.38</p></li>
+<li><p>Bet 301.37 PLN for Ilja Marczenko and 698.63 PLN for Botic Van De Zandschulp in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 950.14</p></li>
+<li><p>Bet 289.47 PLN for Joao Menezes and 710.53 PLN for Carlos Taberner in ATP - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 945</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 640 PLN for Caty McNally / Storm Sanders and 360 PLN for Erin Routliffe / Aldila Sutjiadi in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 18:30:00) with an expected return of 1476</p></li>
-<li><p>Bet 640 PLN for Caty McNally / Storm Sanders and 360 PLN for Erin Routliffe / Aldila Sutjiadiin ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 1476</p></li>
-<li><p>Bet 816.09 PLN for Peter Heller / Jeroen Vanneste and 183.91 PLN for Edoardo Eremin / Antonio Massara in ITF Mens - DEBEL: M15 Antalya (Turkey), grass courts - quarter finals (starting 06-05-2021 20:30:00) with an expected return of 1450</p></li>
+<li><p>Bet 784.31 PLN for Gauthier Onclin and 215.69 PLN for Luka Todorovic in ITF Mens - Single: M25 Kiseljak (Bośnia i Hercegowina), grass courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2156.86</p></li>
+<li><p>Bet 784.31 PLN for Gauthier Onclin and 215.69 PLN for Luka Todorovicin ITF Mens - Single: M25 Kiseljak (Bośnia i Hercegowina), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2156.86</p></li>
+<li><p>Bet 784.31 PLN for Gauthier Onclin and 215.69 PLN for Luka Todorovic in ITF Mens - Single: M25 Kiseljak (Bośnia i Hercegowina), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 2156.86</p></li>
 </ol>
 <p><strong>Totolotek</strong></p>
 <p><em>Minimum adverse</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 296.5 PLN for John Isner and 703.5 PLN for Andriej Rublow in ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 18:30:00) with an expected return of 921.59</p></li>
-<li><p>Bet 120 PLN for Erin Routliffe / Aldila Sutjiadi and 880 PLN for Caty McNally / Storm Sanders in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 19:00:00) with an expected return of 914.63</p></li>
-<li><p>Bet 322.58 PLN for Raven Klaasen / Ben McLachlan and 677.42 PLN for Pierre-Hugues Herbert / Nicolas Mahut in ATP - DEBEL: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 20:30:00) with an expected return of 914.52</p></li>
+<li><p>Bet 354.84 PLN for Roberto Carballes Baena and 645.16 PLN for Federico Delbonis in ATP - Single: Belgrade 2 (Serbia), grass courts - quarter finals (starting 2021-05-27 14:00:00) with an expected return of 909.68</p></li>
+<li><p>Bet 385.96 PLN for Norbert Gombos and 614.04 PLN for Marco Cecchinato in ATP - Single: Parma (Italy), grass courts - quarter finals (starting 2021-05-27 09:30:00) with an expected return of 902.63</p></li>
+<li><p>Bet 366.67 PLN for Olga Goworcowa and 633.33 PLN for Aleksandra Krunic in WTA - Single: French Open (France) - qualifications, grass courts - final (starting 2021-05-27 09:30:00) with an expected return of 899.33</p></li>
 </ol>
 <p><em>Maximum return</em></p>
 <ol style="list-style-type: decimal">
-<li><p>Bet 640 PLN for Caty McNally / Storm Sanders and 360 PLN for Erin Routliffe / Aldila Sutjiadi in ITF Womens - DEBEL: W100 Charleston, SC (USA), grass courts - quarter finals (starting 06-05-2021 18:30:00) with an expected return of 1476</p></li>
-<li><p>Bet 784.37 PLN for Andriej Rublow and 215.63 PLN for John Isnerin ATP - Single: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 19:00:00) with an expected return of 1444.35</p></li>
-<li><p>Bet 765.4 PLN for Pierre-Hugues Herbert / Nicolas Mahut and 234.6 PLN for Raven Klaasen / Ben McLachlan in ATP - DEBEL: Madryt (Spain), grass courts - 1/8 final (starting 06-05-2021 20:30:00) with an expected return of 1389.26</p></li>
+<li><p>Bet 792.08 PLN for Diego Fernandez Flores and 207.92 PLN for Fouad Behbehani in ITF Mens - Single: M15 Marbella (Spain), hard courts - 1/8 final (starting 2021-05-27 14:00:00) with an expected return of 2287.13</p></li>
+<li><p>Bet 727.27 PLN for Oksana Selekhmeteva and 272.73 PLN for Emilie Lindhin ITF Womens - Single: W15 Santa Margarita de Montbui (Spain), hard courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 1609.09</p></li>
+<li><p>Bet 733.94 PLN for Nuno Borges and 266.06 PLN for Denis Yevseyev in CHALLENGER Mens - Single: Oeiras 4 (Portugal), grass courts - 1/8 final (starting 2021-05-27 09:30:00) with an expected return of 1524.5</p></li>
 </ol>
 <p><strong>Disclaimer</strong></p>
 <p><em>Please note, that online betting is a gambling entertainment vehicle, and that it carries with it a certain degree of financial risk. Players should be aware of this risk, and govern themselves accordingly.</em></p>

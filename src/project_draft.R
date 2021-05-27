@@ -32,7 +32,8 @@ library(tidyverse)  # tidyverse 1.3.1
 
 #### Data ####
 
-data <- read_csv('data_060521_163644.csv')
+#data <- read_csv('data_060521_163644.csv') # Old Data
+data <- read_csv('data_270521_001719.csv') # New data 27.05
 
 #### Analysis ####
 
@@ -42,6 +43,10 @@ data <- read_csv('data_060521_163644.csv')
 money <- params$money
 expected_return <- params$expected_return
 adverse_return <- params$adverse_return
+
+money <- 1000
+expected_return <- 0.1
+adverse_return <- -0.2
 
 ##
 
@@ -68,8 +73,14 @@ dict <- read_csv('rafal/translation-20210524.csv')
 for (i in 1:length(dict$pl)) {
   
   data$event <- as.data.frame(sapply(data$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
-  
+
 }
+
+data <- as.data.frame(do.call(cbind, data)) %>% rename(event=`sapply(data$event, gsub, pattern = dict[i, ]$pl, replacement = dict[i, ]$angl)`)
+data <- data %>% mutate(gender = case_when(str_detect(event, "Womens") ~ "W",
+                                     str_detect(event, "WTP") ~ "W",
+                                     TRUE ~ "M"))
+
 
 data <- data %>%
   mutate(match_id = row_number(), .before = event) %>%
@@ -201,7 +212,7 @@ data_max_return <- data %>%
 #' and `r round(pull(data_max_return[paste0('to_bet_', data_max_return$better_favourite[1], '_if_', data_max_return$better_favourite[1], '_favourite')])[1], 2)` 
 #' PLN on `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1])])[1]`
 #' (`r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_nationality')])[1]`,
-#' ATP ranking: `r pull(data_max_return[paste0('player_', data_max_return$bett=er_favourite[1], '_rank')])[1]`)
+#' ATP ranking: `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_rank')])[1]`)
 #' on `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_bookmaker')])[1]`
 #' (betting odds: `r pull(data_max_return[paste0('player_', data_max_return$better_favourite[1], '_odds')])[1]`)
 #' in `r pull(data_max_return['event'])[1]` (starting `r pull(data_max_return['match_time'])[1]`).
