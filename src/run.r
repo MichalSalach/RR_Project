@@ -18,6 +18,16 @@ render_report = function(money = 1000,
   )
 }
 
+
+
+
+render_report(
+  money = 1000,
+  expected_return = 0.1,
+  adverse_return = -0.2
+)
+
+
 # render_report = function(money = 1000,
 #                          expected_return = 0.1,
 #                          adverse_return = -0.2) {
@@ -31,13 +41,3 @@ render_report = function(money = 1000,
 #     output_file = paste0('test','.html')
 #   )
 # }
-
-
-render_report(
-  money = 1000,
-  expected_return = 0.1,
-  adverse_return = -0.2
-)
-
-
-unique(data$player_1_bookmaker)

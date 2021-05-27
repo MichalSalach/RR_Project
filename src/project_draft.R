@@ -33,7 +33,7 @@ library(tidyverse)  # tidyverse 1.3.1
 #### Data ####
 
 #data <- read_csv('data_060521_163644.csv') # Old Data
-data <- read_csv('data_270521_001719.csv') # New data 27.05
+data <- read_csv('data/data_270521_001719.csv') # New data 27.05
 
 #### Analysis ####
 
@@ -69,7 +69,7 @@ bookmakers_df <- data.frame(bookmakers,bookmakers_links)
 # and min offers for both players in a match.
 
 # Translate Polish tennis specific terms and countries name to english
-dict <- read_csv('rafal/translation-20210524.csv')
+dict <- read_csv('data/translation-20210524.csv')
 for (i in 1:length(dict$pl)) {
   
   data$event <- as.data.frame(sapply(data$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
@@ -235,3 +235,82 @@ data_max_return <- data %>%
 # - dodać disclaimer, że zakłady to hazard i 18+, a praca ma charakter badawczo-analityczny - done
 # - na koniec połaczyć scraper w R i generator raportów
 
+# =================
+# General
+# =================
+data_trade_off_plot_general <- data %>% 
+  slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return) %>% 
+  summarise(adv_return = max(better_adverse_return))
+# =================
+# Gender
+# =================
+data_trade_off_plot_gender <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return,gender) %>% 
+  summarise(adv_return = max(better_adverse_return))
+# =================
+# Bookmaker
+# =================
+data_trade_off_plot_bookmaker <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money,
+         bookmaker = ifelse(win_1_bet_2_return>win_2_bet_1_return,player_1_bookmaker,player_2_bookmaker)) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return,bookmaker) %>% 
+  summarise(adv_return = max(better_adverse_return))
