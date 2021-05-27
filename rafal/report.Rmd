@@ -204,6 +204,68 @@ Given that in reality, offers for both players are greater than 1, a client does
 Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client's favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite's win, having fixed on some level the loss in the adverse case.
 The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul 1000 PLN), *expected_return* (defaul 0.1) and *adverse_return* (default -0.2).
 
+```{r tables_calculations, echo=FALSE,include=FALSE}
+# ==============================================================================
+# Preparation of data for tables
+# ==============================================================================
+df <- read_csv('../data_270521_001719.csv')
+dict <- read_csv('translation-20210524.csv')
+for (i in 1:length(dict$pl)) {
+  
+  df$event <- as.data.frame(sapply(df$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
+  
+}
+df <- as.data.frame(do.call(cbind, df)) %>% rename(event=`sapply(df$event, gsub, pattern = dict[i, ]$pl, replacement = dict[i, ]$angl)`)
+
+
+df <-
+  df %>% mutate(
+    gender = case_when(
+      str_detect(event, "Womens") ~ "W",
+      str_detect(event, "WTP") ~ "W",
+      TRUE ~ "M"
+    ),
+    match_current = if_else(if_any(contains('_games'), function(x)
+      is.na(x)), 0, 1),
+    .after = match_time
+  )
+
+# General table
+count <- df  %>% summarise("Total count" = n())
+count_gender_w <- df %>% filter(gender=="W") %>% summarise("Women matches" = n())
+count_gender_m <- df %>% filter(gender=="M") %>% summarise("Men matches" = n())
+count_live_yes <- df %>% filter(match_current==1) %>% summarise("Live matches" = n())
+count_live_no <- df %>% filter(match_current==0) %>% summarise("Planned matches" = n())
+
+
+count_bets <- df %>% select(event,player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% 
+  filter(is.na(player_1_eFortuna) &
+           is.na(player_1_STS)&
+           is.na(player_1_Betclic)&
+           is.na(player_1_Betfan)&
+           is.na(player_1_Lvbet)&
+           is.na(player_1_Pzbuk)&
+           is.na( player_1_Totolotek)) %>% summarise("Number of bets"=count-n())
+
+general_stats_table <- cbind(count,count_gender_w,count_gender_m,count_bets,count_live_yes,count_live_no)
+
+#Bookers table
+df_cnt_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_all(funs(sum(!is.na(.))))
+df_avg_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_each(funs(mean(., na.rm = TRUE)))
+
+bookers_table <- rbind(df_cnt_bet,df_avg_bet)
+rownames(bookers_table) <- c("Bookmaker bet count","Average bet size")
+colnames(bookers_table) <- c('eFortuna','STS','Betclick',"Betfan","Lvbet","Pzbuk","Totolotek")
+
+```
+
+### Summary statistics
+
+```{r tables, echo=FALSE}
+knitr::kable(bookers_table)
+knitr::kable(general_stats_table)
+```
+
 ### Best bet in case the favourite wins
 
 Having `r money` PLN, the best bet to do right now in order to have `r 100*expected_return`% return in the case of a favorite win and minimal loss in the case of the favorite loss is to bet `r value_to_bet` PLN on `r player_to_bet_for` (`r player_to_bet_for_nationality`, ATP ranking: `r player_to_bet_for_atp_ranking`) on [`r best_bet_bookmaker`](`r best_bet_bookmaker_link`) (betting odds: `r best_bet_betting_odds`) and `r value_to_bet2` PLN on `r player_to_bet_for2` (`r player_to_bet_for_nationality2`, ATP ranking: `r player_to_bet_for_atp_ranking2`) on [`r best_bet_bookmaker2`](`r best_bet_bookmaker_link2`) (betting odds: `r best_bet_betting_odds2`, expected return: `r expected_return_pln` PLN, that is `r expected_return_percentage`%) in `r event` (starting `r match_time`).
@@ -967,7 +1029,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 ```{r charts_data, echo=FALSE,include=FALSE}
 
-data <-
+data <- #This should be higher up 
   data %>% mutate(gender = case_when(str_detect(event, "Womens") ~ "W",
                                      str_detect(event, "WTP") ~ "W",
                                      TRUE ~ "M"))
