@@ -49,7 +49,10 @@ library(tidyverse)  # tidyverse 1.3.1
 
 
 #### Data ####
-data_raw <- read_csv('../data/data_270521_032950.csv') # New data 27.05
+# Option 1
+#data <- raw <- load("data/data.RData")
+# Option 2
+data_raw <- read_csv('../data/data_270521_032950.csv')
 data <- data_raw
 
 # A list of bookmakers
@@ -219,7 +222,7 @@ In our project, we search for the most profitable bets to make on the tennis mat
 Given that in reality, offers for both players are greater than 1, a client does not have to bet all their money on a favorite to achieve some profit. The remaining amount of money the client would bet on a non-favorite as a form of insurance in the case of misfortune (favorite loses). A no-risk bet is, therefore, a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favorite loses. For example, in betting, odds for a player A (the bookmaker's favorite) are 1.5, and for a player, B is 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the project aims to find the offers that come the closest to this, for any moment in time.
 
 Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client's favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite's win, having fixed on some level the loss in the adverse case.
-The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul 1000 PLN), *expected_return* (defaul 0.1) and *adverse_return* (default -0.2).
+The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul 1000 PLN), *expected_return* (default 0.1) and *adverse_return* (default -0.2).
 
 ```{r tables_calculations, echo=FALSE,include=FALSE}
 # ==============================================================================
@@ -249,7 +252,7 @@ df <-
   )
 
 # General table
-count <- df  %>% summarise("Total count" = n())
+count <- df  %>% summarise("Matches count" = n())
 count_gender_w <- df %>% filter(gender=="W") %>% summarise("Women matches" = n())
 count_gender_m <- df %>% filter(gender=="M") %>% summarise("Men matches" = n())
 count_live_yes <- df %>% filter(match_current==1) %>% summarise("Live matches" = n())
@@ -272,7 +275,7 @@ df_cnt_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,play
 df_avg_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_each(funs(mean(., na.rm = TRUE)))
 
 bookers_table <- rbind(df_cnt_bet,df_avg_bet)
-rownames(bookers_table) <- c("Bookmaker bet count","Average bet size")
+rownames(bookers_table) <- c("Number of bets","Average offer")
 colnames(bookers_table) <- c('eFortuna','STS','Betclick',"Betfan","Lvbet","Pzbuk","Totolotek")
 
 ```
@@ -918,7 +921,8 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 ### Top 3 bets for each bookmaker
 **eFortuna**
 
-*Minimum adverse*
+
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b1.1_money1_1` PLN for `r data_b1.1_player1_1` and `r data_b1.1_money2_1` PLN for `r data_b1.1_player2_1` in `r data_b1.1_event_1` (starting `r data_b1.1_time_1`) with an expected return of `r data_b1.1_return_1`
 
@@ -926,7 +930,8 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b1.1_money1_3` PLN for `r data_b1.1_player1_3` and `r data_b1.1_money2_3` PLN for `r data_b1.1_player2_3` in `r data_b1.1_event_3` (starting `r data_b1.1_time_3`) with an expected return of `r data_b1.1_return_3`
 
-*Maximum return*
+
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b1.2_money1_1` PLN for `r data_b1.2_player1_1` and `r data_b1.2_money2_1` PLN for `r data_b1.2_player2_1` in `r data_b1.2_event_1` (starting `r data_b1.2_time_1`) with an expected return of `r data_b1.2_return_1`
 
@@ -937,7 +942,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **STS**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b2.1_money1_1` PLN for `r data_b2.1_player1_1` and `r data_b2.1_money2_1` PLN for `r data_b2.1_player2_1` in `r data_b2.1_event_1` (starting `r data_b2.1_time_1`) with an expected return of `r data_b2.1_return_1`
 
@@ -945,7 +950,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b2.1_money1_3` PLN for `r data_b2.1_player1_3` and `r data_b2.1_money2_3` PLN for `r data_b2.1_player2_3` in `r data_b2.1_event_3` (starting `r data_b2.1_time_3`) with an expected return of `r data_b2.1_return_3`
 
-*Maximum return*
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b2.2_money1_1` PLN for `r data_b2.2_player1_1` and `r data_b2.2_money2_1` PLN for `r data_b2.2_player2_1` in `r data_b2.2_event_1` (starting `r data_b2.2_time_1`) with an expected return of `r data_b2.2_return_1`
 
@@ -955,7 +960,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **Betclick**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b3.1_money1_1` PLN for `r data_b3.1_player1_1` and `r data_b3.1_money2_1` PLN for `r data_b3.1_player2_1` in `r data_b3.1_event_1` (starting `r data_b3.1_time_1`) with an expected return of `r data_b3.1_return_1`
 
@@ -963,7 +968,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b3.1_money1_3` PLN for `r data_b3.1_player1_3` and `r data_b3.1_money2_3` PLN for `r data_b3.1_player2_3` in `r data_b3.1_event_3` (starting `r data_b3.1_time_3`) with an expected return of `r data_b3.1_return_3`
 
-*Maximum return*
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b3.2_money1_1` PLN for `r data_b3.2_player1_1` and `r data_b3.2_money2_1` PLN for `r data_b3.2_player2_1` in `r data_b3.2_event_1` (starting `r data_b3.2_time_1`) with an expected return of `r data_b3.2_return_1`
 
@@ -973,7 +978,8 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **Betfan**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
+
 
 1. Bet `r data_b4.1_money1_1` PLN for `r data_b4.1_player1_1` and `r data_b4.1_money2_1` PLN for `r data_b4.1_player2_1` in `r data_b4.1_event_1` (starting `r data_b4.1_time_1`) with an expected return of `r data_b4.1_return_1`
 
@@ -981,7 +987,8 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b4.1_money1_3` PLN for `r data_b4.1_player1_3` and `r data_b4.1_money2_3` PLN for `r data_b4.1_player2_3` in `r data_b4.1_event_3` (starting `r data_b4.1_time_3`) with an expected return of `r data_b4.1_return_3`
 
-*Maximum return*
+
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b4.2_money1_1` PLN for `r data_b4.2_player1_1` and `r data_b4.2_money2_1` PLN for `r data_b4.2_player2_1` in `r data_b4.2_event_1` (starting `r data_b4.2_time_1`) with an expected return of `r data_b4.2_return_1`
 
@@ -992,7 +999,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **Pzbuk**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b5.1_money1_1` PLN for `r data_b5.1_player1_1` and `r data_b5.1_money2_1` PLN for `r data_b5.1_player2_1` in `r data_b5.1_event_1` (starting `r data_b5.1_time_1`) with an expected return of `r data_b5.1_return_1`
 
@@ -1000,7 +1007,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b5.1_money1_3` PLN for `r data_b5.1_player1_3` and `r data_b5.1_money2_3` PLN for `r data_b5.1_player2_3` in `r data_b5.1_event_3` (starting `r data_b5.1_time_3`) with an expected return of `r data_b5.1_return_3`
 
-*Maximum return*
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b5.2_money1_1` PLN for `r data_b5.2_player1_1` and `r data_b5.2_money2_1` PLN for `r data_b5.2_player2_1` in `r data_b5.2_event_1` (starting `r data_b5.2_time_1`) with an expected return of `r data_b5.2_return_1`
 
@@ -1011,7 +1018,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **Lvbet**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b6.1_money1_1` PLN for `r data_b6.1_player1_1` and `r data_b6.1_money2_1` PLN for `r data_b6.1_player2_1` in `r data_b6.1_event_1` (starting `r data_b6.1_time_1`) with an expected return of `r data_b6.1_return_1`
 
@@ -1019,7 +1026,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b6.1_money1_3` PLN for `r data_b6.1_player1_3` and `r data_b6.1_money2_3` PLN for `r data_b6.1_player2_3` in `r data_b6.1_event_3` (starting `r data_b6.1_time_3`) with an expected return of `r data_b6.1_return_3`
 
-*Maximum return*
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b6.2_money1_1` PLN for `r data_b6.2_player1_1` and `r data_b6.2_money2_1` PLN for `r data_b6.2_player2_1` in `r data_b6.2_event_1` (starting `r data_b6.2_time_1`) with an expected return of `r data_b6.2_return_1`
 
@@ -1029,7 +1036,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 **Totolotek**
 
-*Minimum adverse*
+*Best return in adverse scenario given `r 100*adverse_return`% return in the case of the favorite's win*
 
 1. Bet `r data_b7.1_money1_1` PLN for `r data_b7.1_player1_1` and `r data_b7.1_money2_1` PLN for `r data_b7.1_player2_1` in `r data_b7.1_event_1` (starting `r data_b7.1_time_1`) with an expected return of `r data_b7.1_return_1`
 
@@ -1037,7 +1044,7 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b7.1_money1_3` PLN for `r data_b7.1_player1_3` and `r data_b7.1_money2_3` PLN for `r data_b7.1_player2_3` in `r data_b7.1_event_3` (starting `r data_b7.1_time_3`) with an expected return of `r data_b7.1_return_3`
 
-*Maximum return*
+*Best return in maximum return scenario given `r 100*expected_return`% expected return in the case of the favorite's win*
 
 1. Bet `r data_b7.2_money1_1` PLN for `r data_b7.2_player1_1` and `r data_b7.2_money2_1` PLN for `r data_b7.2_player2_1` in `r data_b7.2_event_1` (starting `r data_b7.2_time_1`) with an expected return of `r data_b7.2_return_1`
 
@@ -1134,8 +1141,8 @@ data_trade_off_plot_bookmaker <- data %>%
 
 ```
 
-```{r charts_ratio, echo=FALSE,warning=FALSE}
-# Plottning trade-off scenarios 
+```{r charts_ratio, fig.align = 'center', echo=FALSE,warning=FALSE}
+# Plotning trade-off scenarios 
 
 library(viridis)
 library(hrbrthemes)
