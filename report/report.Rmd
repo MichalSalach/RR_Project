@@ -1139,6 +1139,35 @@ data_trade_off_plot_bookmaker <- data %>%
   group_by(exp_return,bookmaker) %>% 
   summarise(adv_return = max(better_adverse_return))
 
+# =================
+# Bookmaker favorite
+# =================
+
+data_trade_off_plot_favorite <- data %>% 
+  dplyr::slice(rep(1:n(), each = 12)) %>% 
+  mutate(exp_return = rep(c(0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5), times = n()/12)) %>% 
+  group_by(match_id) %>%
+  mutate(to_bet_1_if_1_favourite = (1+exp_return)*money/player_1_odds_max,
+         to_bet_2_if_1_favourite = money-to_bet_1_if_1_favourite,
+         win_2_bet_1 = to_bet_2_if_1_favourite*player_2_odds_max,
+         win_2_bet_1_return = (win_2_bet_1-money)/money,
+         to_bet_2_if_2_favourite = (1+exp_return)*money/player_2_odds_max,
+         to_bet_1_if_2_favourite = money-to_bet_2_if_2_favourite,
+         win_1_bet_2 = to_bet_1_if_2_favourite*player_1_odds_max,
+         win_1_bet_2_return = (win_1_bet_2-money)/money) %>% 
+  rowwise() %>% 
+  mutate(better_adverse_return = max(win_2_bet_1_return, win_1_bet_2_return),
+         bookmakers_favourite = if_else(player_1_odds < player_2_odds, TRUE, FALSE)) %>%
+  ungroup() %>% 
+  filter(player_1_odds == player_1_odds_max,
+         player_2_odds == player_2_odds_max,
+         to_bet_1_if_1_favourite <= money,
+         to_bet_1_if_2_favourite >= 0,
+         to_bet_2_if_2_favourite <= money,
+         to_bet_2_if_1_favourite >= 0) %>%
+  group_by(exp_return,bookmakers_favourite) %>% 
+  summarise(adv_return = max(better_adverse_return))
+
 ```
 
 ```{r charts_ratio, fig.align = 'center', echo=FALSE,warning=FALSE}
@@ -1194,7 +1223,79 @@ data_trade_off_plot_bookmaker %>%
   ylab("Level of adverse return") +
   xlab("Level of expected return")
 
+
+data_trade_off_plot_favorite %>%
+  ggplot(aes(
+    x = exp_return,
+    y = adv_return,
+    group = bookmakers_favourite,
+    color = bookmakers_favourite
+  )) +
+  geom_line() +
+  geom_point(aes(fill=bookmakers_favourite),size=3) +
+  scale_color_viridis(discrete = TRUE) +
+  ggtitle("Expected return and adverse return",
+          subtitle = "Whether the favourite of a client is the same or different as the favourite of a bookmaker") +
+  theme_ipsum() +
+  ylab("Level of adverse return") +
+  xlab("Level of expected return")
+
 ```
+
+
+
+```{r charts_2, fig.align = 'center', echo=FALSE,warning=FALSE}
+data %>%
+  rowwise() %>% 
+  mutate(bookmakers_favourite_odds = if_else(player_1_odds < player_2_odds, player_1_odds, player_2_odds),
+         bookmakers_non_favourite_odds = if_else(player_1_odds < player_2_odds, player_2_odds, player_1_odds)) %>%
+  select(match_id, match_current, bookmakers_favourite_odds, bookmakers_non_favourite_odds) %>% 
+  group_by(match_id) %>% 
+  mutate(favourite = mean(bookmakers_favourite_odds, na.rm = TRUE),
+         non_favourite = mean(bookmakers_non_favourite_odds, na.rm = TRUE)) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>% 
+  pivot_longer(cols = c(favourite, non_favourite), values_to = 'odds',
+               names_to = 'is_bookmakers_favourite') %>%
+  select(-c(bookmakers_favourite_odds, bookmakers_non_favourite_odds)) %>% 
+  group_by(match_current) %>% 
+  mutate(no_matches = dplyr::n()) %>% 
+  ungroup() %>% 
+  group_by(match_current, is_bookmakers_favourite) %>% 
+  mutate(odds = mean(odds, na.rm = TRUE)) %>% 
+  slice_head(n = 1) %>% 
+  ggplot(aes(x = odds, y = is_bookmakers_favourite, fill = as.factor(no_matches))) +
+  geom_col() +
+  coord_flip() +
+  labs(y = '', 
+       title = "Average offers: bookmakers' favourites vs non-favourites\nand ongoing matches vs future ones",
+       fill = 'maches') +
+  scale_x_continuous(breaks = function(x) seq(0, ceiling(x[2]), .5)) +
+  facet_wrap(~ match_current, labeller = as_labeller(c(`0` = 'future', `1` = 'ongoing'))) +
+  theme(legend.position = c(0.5, 2)) + theme_ipsum() 
+
+### Boxplots for betting odds - separately for bookmakers' favourites and non-favourites
+
+data %>%
+  rowwise() %>% 
+  mutate(bookmakers_favourite_odds = if_else(player_1_odds < player_2_odds, player_1_odds, player_2_odds),
+         bookmakers_non_favourite_odds = if_else(player_1_odds < player_2_odds, player_2_odds, player_1_odds)) %>%
+  select(match_id, bookmakers_favourite_odds, bookmakers_non_favourite_odds) %>% 
+  distinct(bookmakers_favourite_odds, bookmakers_non_favourite_odds) %>% 
+  pivot_longer(cols = c(bookmakers_favourite_odds, bookmakers_non_favourite_odds), values_to = 'odds',
+               names_to = 'is_bookmakers_favourite') %>%
+  mutate(is_bookmakers_favourite = fct_recode(is_bookmakers_favourite, 'favourite' = 'bookmakers_favourite_odds',
+                                              'non_favourite' = 'bookmakers_non_favourite_odds')) %>% 
+  ggplot(aes(x = is_bookmakers_favourite, y = odds)) +
+  geom_boxplot(color = 'black') +
+  geom_jitter(aes(color = is_bookmakers_favourite), width = .25, alpha = .25, show.legend = FALSE) +
+  labs(title = "Bookmakers' offers distribution for favourites\nand non-favourites",
+       x = '') +
+  scale_y_continuous(breaks = function(x) seq(0, ceiling(x[2]), .5)) +
+  theme_ipsum()
+
+```
+
 
 **Disclaimer**
 

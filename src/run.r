@@ -19,7 +19,7 @@ render_report = function(money = 1000,
 }
 
 
-
+source("src/Scraping_flashscore_tennis_R.R")
 
 render_report(
   money = 1000,
@@ -27,17 +27,3 @@ render_report(
   adverse_return = -0.2
 )
 
-
-# render_report = function(money = 1000,
-#                          expected_return = 0.1,
-#                          adverse_return = -0.2) {
-#   rmarkdown::render(
-#     "rafal/report.Rmd",
-#     params = list(
-#       money = money,
-#       expected_return = expected_return,
-#       adverse_return = adverse_return
-#     ),
-#     output_file = paste0('test','.html')
-#   )
-# }
