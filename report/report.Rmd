@@ -33,13 +33,33 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r libraries, echo=FALSE,include=FALSE}
-# Loading required libraries
+# Package names
+packages <-
+  c(
+    "viridis",
+    "hrbrthemes",
+    "knitr",
+    "rmarkdown",
+    "lubridate",
+    "tidyverse",
+    "httr",
+    "rvest",
+    "lubridate",
+    "jsonlite",
+    "eList"
+  )
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])}
+  
 
 library(viridis)      # 0.6.1
 library(hrbrthemes)   # 0.8.0
 library(knitr)        # 1.33
-library(rmarkdown)    #2.7
-library(lubridate)    #1.7.10
+library(rmarkdown)    # 2.7
+library(lubridate)    # 1.7.10
 library(tidyverse)    # 1.3.1
 library(httr)         # 1.4.2
 library(rvest)        # 1.0.0
@@ -1267,7 +1287,8 @@ data_trade_off_plot_gender %>%
   geom_line() +
   geom_point(aes(fill=gender),size=3) +
   scale_color_viridis(discrete = TRUE) +
-  ggtitle("Expected return and adverse return relation - Gender") +
+  ggtitle("Expected return and adverse return relation",
+          subtitle = "Gender specific") +
   theme_ipsum() +
   ylab("Level of adverse return") +
   xlab("Level of expected return")
@@ -1283,7 +1304,8 @@ data_trade_off_plot_bookmaker %>%
   geom_line() +
   geom_point(aes(fill=bookmaker),size=3) +
   scale_color_viridis(discrete = TRUE) +
-  ggtitle("Expected return and adverse return relation - Bookmaker") +
+  ggtitle("Expected return and adverse return relation",
+          subtitle = "Bookmaker specific") +
   theme_ipsum() +
   ylab("Level of adverse return") +
   xlab("Level of expected return")
@@ -1300,7 +1322,7 @@ data_trade_off_plot_favorite %>%
   geom_point(aes(fill=bookmakers_favourite),size=3) +
   scale_color_viridis(discrete = TRUE) +
   ggtitle("Expected return and adverse return",
-          subtitle = "Whether the favourite of a client is the same or different as the favourite of a bookmaker") +
+          subtitle = "Same vs. different favourite of a bookmaker and of a player") +
   theme_ipsum() +
   ylab("Level of adverse return") +
   xlab("Level of expected return")
