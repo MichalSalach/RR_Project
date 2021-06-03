@@ -1,10 +1,6 @@
 # Reproducible Research 2021: Live analysis of betting odds for tennis matches
 ===
 
-## Table of Contents
-
-[TOC]
-
 ## Introduction
 
 We serach for the most profitable bets to make on the tennis matches for a given moment. We consider 7 popular Polish bookmakers, whose betting odds are reported on an ongoing basis on flashscore.pl/tennis. We are interested in the end results only (who wins), and only in the matches that are ongoing or scheduled for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match there is a favourite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the the odds for both players are the same - this does not cause a problem for our analysis). A favourite of a bookamaker in a given match is the player for whom offers are lower (closer to 1). Other than that, there is also a favourite of a client of the bookmaker - this is the player, whose win would grant the client a profit. Given that in reality offers for both players are greater than 1, a client does not have to bet all their money on a favourite in order to achieve some profit. The remaining amount of money the client would bet on a non-favourite as a form of insurance in the case of misfortune (favourite loses). A no-risk bet is therefore a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favourite loses. For example in betting odds for a player A (the bookamaker's favourite) are 1.5 and for a player B are 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the aim of the project is find the offers that come the closest to this, for any moment in time.
@@ -26,7 +22,5 @@ The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul
 
 
 
-:::info
 **Please note**  that running our scaper on late hours is unlikely to produce any results, since there may be no more matches scheduled for that day and no betting odds.
-:::
 
