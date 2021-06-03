@@ -3,7 +3,7 @@ title: "Reproducible Research 2021: Live analysis of betting odds for tennis mat
 author:
 - "Rafał Rysiejko"
 - "Michał Sałach"
-date: "May 2021"
+date: "June 2021"
 output:
  prettydoc::html_pretty:
    theme: cayman
@@ -28,11 +28,11 @@ text-align: justify}
 </style>
 
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, echo=FALSE,include=FALSE}
+```{r libraries, echo = FALSE, include = FALSE}
 # Package names
 packages <-
   c(
@@ -67,13 +67,17 @@ library(lubridate)    # 1.7.10
 library(jsonlite)     # 1.7.2
 library(eList)        # 0.2.0
 
+# We will override the dplyr::pull() function, so that it handles error better for our purposes
+pull <- function(x){
+  tryCatch(dplyr::pull(x), error = function(e) NA)
+}
+
 ```
 
-```{r data_preparation, echo=FALSE,include=FALSE,warning=FALSE}
+```{r data_preparation, echo = FALSE, include = FALSE, warning = FALSE}
 
 
 #### Data ####
-# Option 1
 
 data_raw <- read_csv('../data/data_current.csv')
 data <- data_raw
@@ -96,19 +100,19 @@ bookmakers_df <- data.frame(bookmakers,bookmakers_links)
 
 # Translating Polish tennis specific terms and countries name to English
 # Loading pre-made dictionary 
-dict <- read_csv('../data/translation-20210524.csv') #Change working directory to main
+dict <- read_csv('../data/translation.csv')
 
-# Loop for detecting string matches and translating them
-for (i in 1:length(dict$pl)) {
-  
-  data$event <- as.data.frame(sapply(data$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
-
+# Prepare the replacement function and the appropriate pattern for the str_replace_all() function
+repl <- function(col) {
+  dict %>% filter(pl==col) %>% select(angl) %>% pull()
 }
 
-# Saving translated list of values as a part of dataframe and renaming it
-data <- as.data.frame(do.call(cbind, data)) %>% rename(event=`sapply(data$event, gsub, pattern = dict[i, ]$pl, replacement = dict[i, ]$angl)`)
+pat <- str_c("\\b", pull(dict[, 1]), "\\b", collapse="|")
 
-# Reshaping data to long format
+# Replace all matching patterns
+data$event <- str_replace_all(data$event, pat, repl)
+
+ # Reshaping data to long format, adding match identifier and `match_current` (boolean for whether a match is on now)
 data <- data %>%
   mutate(match_id = row_number(), .before = event) %>%
   mutate(match_current = if_else(if_any(contains('_games'), function(x)
@@ -133,14 +137,7 @@ data <- data %>%
   ) %>%
   ungroup() %>%
   filter(!(if_any(contains('_odds_'), function(x)
-    is.infinite(x))))  # See the note below.
-
-# Note: warnings signify that there are matches for which there is no offer (NAs for all
-# bookmakers). It may happen that a future match has currently no betting odds, or that all 
-# are crossed out by the bookmakers. We are not worried by that. The values of 
-# `player_1_odds_max`, `player_1_odds_max`, `player_1_odds_max` and `player_1_odds_max` will be 
-# then Inf/-Inf, and we filter them out.
-
+    is.infinite(x))))
 
 # Given the expected return ((1+expected_return)*money in the case when the favourite wins),
 # count the adverse return (when the favourite loses). Filter out offers when potential loss
@@ -170,6 +167,7 @@ data_min_adverse <- data %>%
          better_non_favourite = if_else(better_favourite == '1', '2', '1')) %>% 
   arrange(desc(better_adverse_return))
 
+# Given the adverse return (accepted by a client when their favourite loses), calculate the best offers in the sense of maximizing the return from the clint's favourite win
 
 data_max_return <- data %>%
   group_by(match_id) %>%
@@ -205,7 +203,9 @@ bookmakers_df %>% filter(bookmakers==pull(data_min_adverse[paste0('player_', dat
 ```
 
 ```{r variables, echo=FALSE,include=FALSE}
-# List of variable for inline referencing
+
+# Listing variables for inline referencing (usually pulling columns from the tibble and accessing the first
+# value)
 
 #==============================================
 # Best bet summary
@@ -238,28 +238,24 @@ match_time <- pull(data_min_adverse['match_time'])[1]
 
 
 # Best bet prediction
+
 ## Introduction 
 
-In our project, we search for the most profitable bets to make on the tennis matches for a given moment. We consider seven popular Polish bookmakers whose betting odds are reported on an ongoing basis on flashscore.pl/tennis. We are interested in the results only (who wins) and only in the ongoing or scheduled matches for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match, there is a favorite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the odds for both players are the same - this does not cause a problem for our analysis). A favorite of a bookmaker in a given match is the player for whom offers are lower (closer to 1). There is also a favorite of a client of the bookmaker - this is the player whose win would grant the client a profit.
+In our project, we search for the most profitable bets to make on the tennis matches for a given moment. We consider seven popular Polish bookmakers whose betting odds are reported on an ongoing basis on [flashscore.pl/tennis](flashscore.pl/tennis). We are interested in the results only (who wins) and only in the ongoing or scheduled matches for a given day. It may be safely assumed that each match will have a winner. It is also pretty always the case that for each match, there is a favorite of the bookmakers (the bookmakers do not have to be unanimous, or it may in principle happen that the odds for both players are the same - this does not cause a problem for our analysis). A favorite of a bookmaker in a given match is the player for whom offers are lower (closer to 1). There is also a favorite of a client of the bookmaker - this is the player whose win would grant the client a profit.
 
 Given that in reality, offers for both players are greater than 1, a client does not have to bet all their money on a favorite to achieve some profit. The remaining amount of money the client would bet on a non-favorite as a form of insurance in the case of misfortune (favorite loses). A no-risk bet is, therefore, a bet in which there is a proportion of money to bet, such that a client of a bookmaker has a profit also when their favorite loses. For example, in betting, odds for a player A (the bookmaker's favorite) are 1.5, and for a player, B is 3.5, a client may bet 700 PLN on a player A and 300 PLN on a player B, granting a win of 1050 PLN (5% profit) in both cases. Such bets rather do not happen in reality, but the project aims to find the offers that come the closest to this, for any moment in time.
 
 Our analysis is looking for the best bets to make from two angles: minimizing loss and maximizing return. Hence, we use two notions of profitability: In the first sense, we are interested in bets that would give a client minimal loss, having fixed on some level expected to return in the case of the client's favorite win. In the second sense, we are looking for bets that would give a maximal client return in their favorite's win, having fixed on some level the loss in the adverse case.
-The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul 1000 PLN), *expected_return* (default 0.1) and *adverse_return* (default -0.2).
+The report will therefore accept 3 meta-prameters: `money` (money to bet, defaul 1000 PLN), `expected_return` (default 0.1) and `adverse_return` (default -0.2).
 
 ```{r tables_calculations, echo=FALSE,include=FALSE}
 # ==============================================================================
 # Preparation of data for tables
 # ==============================================================================
-#df <- read_csv('../data_270521_001719.csv')
 df <- data_raw
 
-for (i in 1:length(dict$pl)) {
-  
-  df$event <- as.data.frame(sapply(df$event,gsub,pattern=dict[i,]$pl,replacement=dict[i,]$angl))
-  
-}
-df <- as.data.frame(do.call(cbind, df)) %>% rename(event=`sapply(df$event, gsub, pattern = dict[i, ]$pl, replacement = dict[i, ]$angl)`)
+# Translate Polish proper names into English (as before)
+df$event <- str_replace_all(df$event, pat, repl)
 
 
 df <-
@@ -293,9 +289,9 @@ count_bets <- df %>% select(event,player_1_eFortuna,player_1_STS,player_1_Betcli
 
 general_stats_table <- cbind(count,count_gender_w,count_gender_m,count_bets,count_live_yes,count_live_no)
 
-#Bookers table
-df_cnt_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_all(funs(sum(!is.na(.))))
-df_avg_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_each(funs(mean(., na.rm = TRUE)))
+# Bookmakers table
+df_cnt_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_all(funs(sum(!is.na(.)))) %>% mutate_all(function(x) toString(x))
+df_avg_bet <- df %>% select(player_1_eFortuna,player_1_STS,player_1_Betclic,player_1_Betfan,player_1_Lvbet,player_1_Pzbuk,player_1_Totolotek) %>% summarise_each(funs(mean(., na.rm = TRUE))) %>% mutate_all(function(x) round(x, 4))
 
 bookers_table <- rbind(df_cnt_bet,df_avg_bet)
 rownames(bookers_table) <- c("Number of bets","Average offer")
@@ -317,7 +313,7 @@ Having `r money` PLN, the best bet to do right now in order to have `r 100*expec
 
 
 
-```{r variables2, echo=FALSE,include=FALSE}
+```{r variables2, echo = FALSE, include = FALSE}
 #  Creating lists of variables for inline referencing 
 
 value_to_bet_ <- round(pull(data_max_return[paste0('to_bet_', data_max_return$better_non_favourite[1], '_if_', data_max_return$better_favourite[1], '_favourite')])[1], 2)
@@ -351,7 +347,7 @@ Having `r money` PLN, the best bet to do right now in order to have maximum`r 10
 
 
 
-```{r charts_2, fig.align = 'center', echo=FALSE,warning=FALSE}
+```{r charts_2_1, fig.align='center', echo=FALSE, warning=FALSE}
 data %>%
   rowwise() %>% 
   mutate(bookmakers_favourite_odds = if_else(player_1_odds < player_2_odds, player_1_odds, player_2_odds),
@@ -374,14 +370,18 @@ data %>%
   ggplot(aes(x = odds, y = is_bookmakers_favourite, fill = as.factor(no_matches))) +
   geom_col() +
   coord_flip() +
-  labs(y = '', 
-       title = "Average offers: bookmakers' favourites vs non-favourites\nand ongoing matches vs future ones",
-       fill = 'maches') +
+  labs(x = 'average odds', y = '', 
+       title = "Bookmakers' favourites vs non-favourites\nand ongoing matches vs future ones",
+       fill = 'maches*',
+       caption = 'Only matches for which there are offers are considered.') +
   scale_x_continuous(breaks = function(x) seq(0, ceiling(x[2]), .5)) +
   facet_wrap(~ match_current, labeller = as_labeller(c(`0` = 'future', `1` = 'ongoing'))) +
   theme(legend.position = c(0.5, 2)) +
   scale_fill_viridis(discrete = TRUE) +
   theme_ipsum()
+
+```
+```{r charts_2_2, fig.align='center', echo=FALSE, warning=FALSE, fig.height=7}
 
 ### Boxplots for betting odds - separately for bookmakers' favourites and non-favourites
 
@@ -400,7 +400,7 @@ data %>%
   geom_jitter(width = .25, alpha = .25, show.legend = FALSE) +
   labs(title = "Bookmakers' offers distribution for favourites\nand non-favourites",
        x = '') +
-  scale_y_continuous(breaks = function(x) seq(0, ceiling(x[2]), .5)) +
+  scale_y_continuous(breaks = function(x) seq(0, ceiling(x[2]), 1)) +
   scale_color_manual(values=c("#440154","#35B779"))+
   theme_ipsum()
 
@@ -1134,7 +1134,19 @@ data_b7.2_return_3 <- round(pull(data_b7.2[paste0('win_', data_b7.2$better_favou
 
 3. Bet `r data_b7.2_money1_3` PLN for `r data_b7.2_player1_3` and `r data_b7.2_money2_3` PLN for `r data_b7.2_player2_3` in `r data_b7.2_event_3` (starting `r data_b7.2_time_3`) with an expected return of `r data_b7.2_return_3`
 
-```{r charts_data, echo=FALSE,include=FALSE}
+---
+
+The graph below illustrates the relation between the return one may have in the case of the favourite's
+win versus the "adverse return" - when the favourite loses. The relation always obtains for the best bet to make
+for the moment of scraping. In general, the relation is adverse. However, if there are any values in the
+positive area, in the top left corner, it indicates that a win-win (no risk) bet is possible (although usually
+for a very small return).
+
+Similar graphs are produced for various grouping variables: gender, bookmakers, and client-bookmaker favourite
+correspondence (or lack thereof). The further up the line, the less risky bets are possible (e.g. against distinct bookmakers). The last graph is devoted to illustrate a hypothesis that betting for a bookmaker's non-favourite (a player with higher offer) as one's favourite is more likely to deliver a less-risky bet. If it is the case, then the purple line should be above the yellow line. Usually though, the results are mixed. It is important to note that betting for the bookmaker's non-favourite as the client's favourite usually does not mean that a larger amount is bet on that player. In most cases, larger sum would still be bet on a player with a lower
+offer.
+
+```{r charts_data, echo = FALSE,include = FALSE}
 # Preparing data for visualizations of the trade-off
 
 data <-
@@ -1252,8 +1264,9 @@ data_trade_off_plot_favorite <- data %>%
 
 ```
 
-```{r charts_ratio, fig.align = 'center', echo=FALSE,warning=FALSE}
-# Plotning trade-off scenarios 
+```{r charts_ratio, fig.align = 'center', echo = FALSE, warning = FALSE}
+
+# Plottning trade-off scenarios 
 
 library(viridis)
 library(hrbrthemes)
@@ -1325,10 +1338,6 @@ data_trade_off_plot_favorite %>%
   xlab("Level of expected return")
 
 ```
-
-
-
-
 
 **Disclaimer**
 

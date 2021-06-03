@@ -2,7 +2,8 @@
 library(lubridate)
 library(markdown)
 
-render_report = function(money = 1000,
+# Create a function for rendering the report
+render_report <- function(money = 1000,
                          expected_return = 0.1,
                          adverse_return = -0.2) {
   # Package names
@@ -21,8 +22,8 @@ render_report = function(money = 1000,
   
   # Packages loading
   invisible(lapply(packages, library, character.only = TRUE))
-  
-  
+
+  # Render report
   rmarkdown::render(
     "report/report.Rmd",
     params = list(
@@ -34,12 +35,15 @@ render_report = function(money = 1000,
   )
 }
 
-
-
-
+# Use this function to render the report and assign you parameters
 render_report(
   money = 1000,
   expected_return = 0.1,
   adverse_return = -0.2
 )
-#=========================================================================================================
+
+# Please note: warnings usually signify that there are matches for which there is no offer (NAs for all
+# bookmakers). It may happen that a future match has currently no betting odds, or that all 
+# are crossed out by the bookmakers. We are not worried by that. The values of 
+# `player_1_odds_max`, `player_1_odds_max`, `player_1_odds_max` and `player_1_odds_max` (in report.Rmd) 
+# will be then Inf/-Inf, and we filter them out.
