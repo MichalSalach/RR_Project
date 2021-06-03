@@ -69,16 +69,15 @@ library(eList)        # 0.2.0
 
 ```
 
-
 ```{r data_preparation, echo=FALSE,include=FALSE,warning=FALSE}
-library(tidyverse)  # tidyverse 1.3.1
 
 
 #### Data ####
 # Option 1
-#data <- raw <- load("data/data.RData")
+#data_raw <- load("../data/data.RData")
 # Option 2
-data_raw <- read_csv('../data/data_270521_155648.csv')
+#data_raw <- read_csv(paste0('../data/data_', scraping_time, '.csv'))
+data_raw <- read_csv('../data/data_current.csv')
 data <- data_raw
 
 # A list of bookmakers
