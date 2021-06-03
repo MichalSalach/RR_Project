@@ -22,7 +22,7 @@ profitability: in the first sense, we are interested in bets that would give a c
 in the case of the client's favourite win. In the second sense, we are looking for bets that would give a client maximal return in the case of 
 thier favourites win, having fixed on some level the loss in the adverse case.
 
-The report will therefore accept 3 meta-prameters: *money* (money to bet, default 1000 PLN), *expected_return* (default 0.1) and *adverse_return* 
+The report will therefore accept 3 meta-prameters: `money` (money to bet, default 1000 PLN), `expected_return` (default 0.1) and `adverse_return` 
 (default -0.2).
 
 ## User's Guide
