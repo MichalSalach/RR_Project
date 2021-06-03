@@ -13,7 +13,7 @@ The report will therefore accept 3 meta-prameters: *money* (money to bet, defaul
 1. Clone repository to your local storage.
 2. Open project using RR_Project.rproject file.
 3. Run the Scraping_flashscore_tennis_R.r file, scrapperd data with its timestamp will be available in the data folder.
-4. The most recent data will be used to create report by default. If one wishes to creater report on past data, please specify the data file in the line 80 of the report.Rmd file.
+4. The most recent data will be used to create report by default. If one wishes to creater report on past data, please specify the data file in the line 78 of the report.Rmd file.
 5. Open file run.r 
 6. Load the function render_report.
 7. Specify parameters {*money to bet*,*expected return*,*adverse return*)}.

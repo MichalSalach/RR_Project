@@ -74,9 +74,7 @@ library(eList)        # 0.2.0
 
 #### Data ####
 # Option 1
-#data_raw <- load("../data/data.RData")
-# Option 2
-#data_raw <- read_csv(paste0('../data/data_', scraping_time, '.csv'))
+
 data_raw <- read_csv('../data/data_current.csv')
 data <- data_raw
 
